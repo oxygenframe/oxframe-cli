@@ -55,6 +55,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # cargo metadata needs the path dependency on ../oxframe-sdk.
+      - uses: actions/checkout@v4
+        with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
+      - run: mv oxframe-sdk ../oxframe-sdk
       - uses: EmbarkStudios/cargo-deny-action@v2
 
   nightly-issue:
