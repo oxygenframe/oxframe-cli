@@ -14,7 +14,7 @@ mod hub;
 mod server;
 mod supervisor;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use crate::ui::UiSource;
@@ -50,7 +50,7 @@ pub fn run(args: DevArgs) -> u8 {
         Some(d) => UiSource::Dir(d),
         None => UiSource::Embedded,
     };
-    let token = random_token();
+    let token = editor_token(&root);
 
     let rt = match tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -109,8 +109,65 @@ pub fn run(args: DevArgs) -> u8 {
     })
 }
 
-fn random_token() -> String {
+/// 128 random bits as hex.
+pub(crate) fn random_token() -> String {
     let mut bytes = [0u8; 16];
     getrandom::fill(&mut bytes).expect("OS random source");
     bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// The editor URL's token, kept per project in `target/oxframe/dev-token`
+/// so an open tab reconnects after `oxframe dev` restarts. `cargo clean`
+/// rotates it. Falls back to a one-off token if the file cannot be written.
+fn editor_token(root: &Path) -> String {
+    let target = std::env::var_os("CARGO_TARGET_DIR")
+        .map(|d| root.join(d))
+        .unwrap_or_else(|| root.join("target"));
+    let path = target.join("oxframe").join("dev-token");
+    if let Ok(t) = std::fs::read_to_string(&path) {
+        let t = t.trim();
+        if t.len() == 32 && t.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return t.to_owned();
+        }
+    }
+    let token = random_token();
+    if let Err(e) = write_private(&path, &token) {
+        tracing::debug!("cannot save {}: {e}", path.display());
+    }
+    token
+}
+
+/// Writes a file only the current user can read.
+fn write_private(path: &Path, contents: &str) -> std::io::Result<()> {
+    use std::io::Write;
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut opts, 0o600);
+    opts.open(path)?.write_all(contents.as_bytes())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn editor_token_is_stable_per_project() {
+        let dir = tempfile::tempdir().unwrap();
+        let a = editor_token(dir.path());
+        assert_eq!(a.len(), 32);
+        assert_eq!(editor_token(dir.path()), a, "same token after a restart");
+        let file = dir.path().join("target/oxframe/dev-token");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(&file).unwrap().permissions().mode();
+            assert_eq!(mode & 0o077, 0, "token file is private");
+        }
+        std::fs::write(&file, "garbage").unwrap();
+        assert_ne!(editor_token(dir.path()), a, "a corrupt file is replaced");
+    }
 }

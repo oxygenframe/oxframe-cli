@@ -129,6 +129,28 @@ async fn init_dev_reload_render() {
         .insert("origin", "http://evil.example".parse().unwrap());
     assert!(tokio_tungstenite::connect_async(bad).await.is_err());
 
+    // A stale token gets close code 4401, which tells the editor to stop.
+    let mut stale = format!("ws://127.0.0.1:{port}/ws?token=stale")
+        .into_client_request()
+        .unwrap();
+    stale.headers_mut().insert(
+        "origin",
+        format!("http://127.0.0.1:{port}").parse().unwrap(),
+    );
+    let (mut s, _) = tokio_tungstenite::connect_async(stale).await.unwrap();
+    match s.next().await {
+        Some(Ok(Message::Close(Some(f)))) => assert_eq!(u16::from(f.code), 4401),
+        other => panic!("expected close 4401, got {other:?}"),
+    }
+    assert_eq!(
+        std::fs::read_to_string(
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("target/e2e-projects/oxframe/dev-token")
+        )
+        .unwrap(),
+        token,
+        "the token is saved for the next run"
+    );
+
     let mut req = format!("ws://127.0.0.1:{port}/ws?token={token}")
         .into_client_request()
         .unwrap();

@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use axum::Router;
-use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
+use axum::extract::ws::{CloseFrame, Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Query, State as AxState};
 use axum::http::{HeaderMap, StatusCode, Uri, header};
 use axum::response::{IntoResponse, Response};
@@ -31,6 +31,9 @@ pub async fn serve(listener: tokio::net::TcpListener, state: State) -> std::io::
     axum::serve(listener, app).await
 }
 
+/// Close code for a missing or wrong token (the editor's `CLOSE_UNAUTHORIZED`).
+pub const CLOSE_UNAUTHORIZED: u16 = 4401;
+
 /// Only pages served by this server may open the socket; otherwise any site
 /// open in another tab could drive the preview.
 pub fn origin_ok(headers: &HeaderMap, port: u16) -> bool {
@@ -55,11 +58,16 @@ async fn ws(
         return (StatusCode::FORBIDDEN, "origin not allowed").into_response();
     }
     if q.token.as_deref() != Some(state.token.as_str()) {
-        return (
-            StatusCode::UNAUTHORIZED,
-            "missing or wrong token; open the URL printed by `oxframe dev`",
-        )
-            .into_response();
+        // Browsers hide a refused handshake's status, so accept and close
+        // with a code the editor recognizes and stops retrying on.
+        return upgrade.on_upgrade(|mut socket| async move {
+            let _ = socket
+                .send(Message::Close(Some(CloseFrame {
+                    code: CLOSE_UNAUTHORIZED,
+                    reason: "missing or wrong token; open the URL printed by `oxframe dev`".into(),
+                })))
+                .await;
+        });
     }
     upgrade.on_upgrade(move |socket| editor(socket, state.hub))
 }

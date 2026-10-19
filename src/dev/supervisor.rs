@@ -138,11 +138,7 @@ impl Supervisor {
     }
 
     async fn start(&self, exe: &Path, reload: bool) -> Option<Running> {
-        let token = {
-            let mut b = [0u8; 16];
-            getrandom::fill(&mut b).expect("OS random source");
-            b.iter().map(|b| format!("{b:02x}")).collect::<String>()
-        };
+        let token = super::random_token();
         let mut cmd = Proc::new(exe);
         cmd.current_dir(&self.root)
             .args(["preview", "--port", "0"])
