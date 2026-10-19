@@ -13,6 +13,8 @@ mod init;
 mod render;
 mod snapshot;
 mod ui;
+mod update_check;
+mod upgrade;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -106,6 +108,9 @@ enum Cmd {
         #[arg(long)]
         release: bool,
     },
+    /// Move the project to the SDK version this CLI is made for, then refresh
+    /// Cargo.lock and the AI agent files.
+    Upgrade,
     /// Write or refresh instructions for AI coding agents (AGENTS.md, .claude/skills/oxframe).
     Agents {
         /// Replace files you edited yourself.
@@ -127,6 +132,7 @@ fn main() -> ExitCode {
         .with_writer(std::io::stderr)
         .init();
 
+    update_check::run();
     let code = match cli.command {
         Cmd::Init { name, sdk_path } => init::run(&name, sdk_path.as_deref()),
         Cmd::Dev {
@@ -176,6 +182,7 @@ fn main() -> ExitCode {
             release,
         }),
         Cmd::Agents { force } => agents::run(force),
+        Cmd::Upgrade => upgrade::run(),
     };
     ExitCode::from(code)
 }

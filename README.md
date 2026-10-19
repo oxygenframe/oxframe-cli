@@ -11,7 +11,20 @@ oxframe render                     # out/hello.mp4
 oxframe check                      # cargo check + meta + protocol versions
 oxframe snapshot --at 1.5          # one frame as PNG in out/snapshots/
 oxframe agents                     # refresh AGENTS.md and the Claude Code skill
+oxframe upgrade                    # move the project to this CLI's SDK version
 ```
+
+## Updating
+
+```sh
+cargo install oxframe-cli --force  # the CLI
+oxframe upgrade                    # then, in each project: SDK pin, Cargo.lock, agent files
+```
+
+Projects pin the SDK (`oxframe = "=0.1.0"`), so a new release never changes
+an existing project by itself. Once a day the CLI checks crates.io in the
+background (`cargo search`) and mentions a newer version; set
+`OXFRAME_NO_UPDATE_CHECK=1` to turn that off (it is off on CI).
 
 Full reference: <https://oxframe.dev/docs/cli>.
 
