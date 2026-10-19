@@ -1,0 +1,67 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+  schedule:
+    # Nightly cross-repo: latest editor-ui and SDK against this CLI.
+    - cron: "17 3 * * *"
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # Cargo.toml points at ../oxframe-sdk; checkout cannot write outside
+      # the workspace, so clone inside and move it next to this repo.
+      - uses: actions/checkout@v4
+        with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
+      - run: mv oxframe-sdk ../oxframe-sdk
+        shell: bash
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: "1.97.1", components: "rustfmt, clippy" }
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+        # Includes ui_lock_matches_embedded_bundle.
+
+  e2e:
+    # oxframe init → oxframe dev until Ready → hot reload → oxframe render --cpu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Cargo.toml points at ../oxframe-sdk; checkout cannot write outside
+      # the workspace, so clone inside and move it next to this repo.
+      - uses: actions/checkout@v4
+        with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
+      - run: mv oxframe-sdk ../oxframe-sdk
+        shell: bash
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: "1.97.1" }
+      - uses: Swatinem/rust-cache@v2
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - if: github.event_name == 'schedule'
+        name: Use the latest editor-ui release
+        run: ./scripts/fetch-ui.sh latest
+      - run: cargo test --test e2e -- --ignored --nocapture
+
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+
+  nightly-issue:
+    if: failure() && github.event_name == 'schedule'
+    needs: [check, e2e]
+    runs-on: ubuntu-latest
+    permissions: { issues: write }
+    steps:
+      - run: gh issue create --repo "$GITHUB_REPOSITORY" --title "Nightly cross-repo run failed" --body "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        env: { GH_TOKEN: "${{ github.token }}" }

@@ -1,0 +1,53 @@
+[package]
+name = "oxframe-cli"
+description = "The `oxframe` command: create, preview with hot reload, render and check oxframe projects"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/oxygenframe/oxframe-cli"
+homepage = "https://oxframe.dev"
+documentation = "https://oxframe.dev/docs/cli"
+readme = "README.md"
+keywords = ["animation", "motion-graphics", "video", "cli", "hot-reload"]
+categories = ["command-line-utilities", "multimedia::video", "graphics"]
+# ui/dist is part of the package: `cargo install` never touches the network.
+include = ["src/**", "templates/**", "ui/dist/**", "ui.lock", "Cargo.toml", "README.md", "LICENSE-*"]
+
+[[bin]]
+name = "oxframe"
+path = "src/main.rs"
+
+[dependencies]
+# Path for local development across sibling repos; the version is what
+# crates.io uses.
+oxframe-protocol = { path = "../oxframe-sdk/crates/oxframe-protocol", version = "0.1.0" }
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "process", "sync", "time", "io-util", "signal"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "ws", "query"] }
+tokio-tungstenite = "0.30"
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+notify = "8"
+rust-embed = { version = "8", features = ["mime-guess"] }
+open = "5"
+anstream = "1"
+anstyle = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+getrandom = "0.3"
+
+[dev-dependencies]
+tempfile = "3"
+http = "1"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

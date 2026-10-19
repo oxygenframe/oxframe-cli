@@ -1,0 +1,81 @@
+name: release
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
+  id-token: write   # cosign keyless signing, crates.io trusted publishing
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
+          - { target: x86_64-apple-darwin, os: macos-13 }
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: "1.97.1", targets: "${{ matrix.target }}" }
+      - run: ./scripts/fetch-ui.sh
+        shell: bash
+      - run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Sign and notarize (macOS)
+        if: runner.os == 'macOS'
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          echo "$CERT_P12" | base64 --decode > cert.p12
+          security create-keychain -p ci build.keychain
+          security import cert.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci build.keychain
+          security default-keychain -s build.keychain && security unlock-keychain -p ci build.keychain
+          bin=target/${{ matrix.target }}/release/oxframe
+          codesign --force --options runtime --timestamp --sign "$IDENTITY" "$bin"
+          ditto -c -k "$bin" oxframe.zip
+          xcrun notarytool submit oxframe.zip --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM" --password "$APPLE_PASSWORD" --wait
+      - name: Package
+        shell: bash
+        run: |
+          name=oxframe-${{ github.ref_name }}-${{ matrix.target }}
+          mkdir "$name" && cp README.md LICENSE-MIT LICENSE-APACHE "$name"/
+          if [ "${{ runner.os }}" = Windows ]; then
+            cp target/${{ matrix.target }}/release/oxframe.exe "$name"/ && 7z a "$name.zip" "$name"
+            sha256sum "$name.zip" > "$name.zip.sha256"
+          else
+            cp target/${{ matrix.target }}/release/oxframe "$name"/ && tar -czf "$name.tar.gz" "$name"
+            shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+          fi
+      - uses: sigstore/cosign-installer@v3
+      - name: Sign with cosign (keyless)
+        shell: bash
+        run: for f in oxframe-*.tar.gz oxframe-*.zip; do [ -e "$f" ] && cosign sign-blob --yes "$f" --bundle "$f.cosign.bundle"; done
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ matrix.target }}", path: "oxframe-*" }
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { merge-multiple: true, path: dist }
+      - run: cp install.sh dist/
+      - run: gh release create "${{ github.ref_name }}" dist/* --generate-notes
+        env: { GH_TOKEN: "${{ github.token }}" }
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: "1.97.1" }
+      - run: ./scripts/fetch-ui.sh
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+      - run: cargo publish --locked
+        env: { CARGO_REGISTRY_TOKEN: "${{ steps.auth.outputs.token }}" }

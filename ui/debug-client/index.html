@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>oxframe — debug client</title>
+<style>
+  :root { color-scheme: dark; --bg:#111; --fg:#ddd; --muted:#888; --accent:#68abdf; }
+  body { margin:0; font:14px system-ui, sans-serif; background:var(--bg); color:var(--fg); display:flex; flex-direction:column; height:100vh; }
+  #view { flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+  canvas { max-width:100%; max-height:100%; background:#000; }
+  #bar { display:flex; gap:8px; align-items:center; padding:8px; border-top:1px solid #333; }
+  #scrub { flex:1; }
+  #status { color:var(--muted); min-width:12em; }
+  pre { margin:0; max-height:30vh; overflow:auto; background:#200; color:#fbb; padding:8px; display:none; }
+</style>
+</head>
+<body>
+<pre id="err"></pre>
+<div id="view"><canvas id="c" width="960" height="540"></canvas></div>
+<div id="bar">
+  <button id="play">▶</button>
+  <input id="scrub" type="range" min="0" max="0" value="0">
+  <span id="frame">0</span>
+  <span id="status">connecting…</span>
+</div>
+<script>
+// Minimal protocol client used until the full editor (oxframe-web/editor-ui)
+// is embedded. Space: play/pause, arrows: step.
+const cfg = window.__OXFRAME_CONFIG__ || { url: "/ws" };
+const token = new URLSearchParams(location.search).get("token") || "";
+const $ = (id) => document.getElementById(id);
+const ctx = $("c").getContext("2d");
+let ws, frame = 0, total = 0, playing = false, delay = 250;
+
+function send(cmd) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(cmd)); }
+function connect() {
+  ws = new WebSocket(`${location.origin.replace(/^http/, "ws")}${cfg.url}?token=${token}`);
+  ws.binaryType = "arraybuffer";
+  ws.onopen = () => { delay = 250; $("status").textContent = "connected";
+    send({ type: "Hello", protocol_version: 1, ui_version: "debug" });
+    send({ type: "SetViewport", w: $("view").clientWidth, h: $("view").clientHeight, dpr: devicePixelRatio }); };
+  ws.onclose = () => { $("status").textContent = "reconnecting…"; setTimeout(connect, delay = Math.min(delay * 2, 5000)); };
+  ws.onmessage = async (m) => {
+    if (typeof m.data !== "string") {
+      const dv = new DataView(m.data), len = dv.getUint32(12, true);
+      const bmp = await createImageBitmap(new Blob([new Uint8Array(m.data, 16, len)], { type: "image/jpeg" }));
+      $("c").width = bmp.width; $("c").height = bmp.height; ctx.drawImage(bmp, 0, 0);
+      return;
+    }
+    const e = JSON.parse(m.data);
+    switch (e.type) {
+      case "Timeline": total = e.frames; $("scrub").max = Math.max(0, total - 1); break;
+      case "Frame": frame = e.index; $("scrub").value = frame; $("frame").textContent = `${frame} / ${total}`; break;
+      case "Playback": playing = e.playing; $("play").textContent = playing ? "❚❚" : "▶"; break;
+      case "Building": $("status").textContent = "building…"; break;
+      case "Reloaded": $("status").textContent = "reloaded"; $("err").style.display = "none";
+        send({ type: "Seek", frame }); break;
+      case "Ready": $("status").textContent = "ready"; $("err").style.display = "none"; break;
+      case "Error": $("err").textContent = e.message; $("err").style.display = "block"; $("status").textContent = e.kind; break;
+    }
+  };
+}
+$("scrub").oninput = (ev) => send({ type: "Seek", frame: +ev.target.value });
+$("play").onclick = () => send({ type: playing ? "Pause" : "Play" });
+addEventListener("keydown", (ev) => {
+  if (ev.key === " ") { ev.preventDefault(); $("play").click(); }
+  if (ev.key === "ArrowRight") send({ type: "Step", delta: ev.shiftKey ? 10 : 1 });
+  if (ev.key === "ArrowLeft") send({ type: "Step", delta: ev.shiftKey ? -10 : -1 });
+});
+connect();
+</script>
+</body>
+</html>

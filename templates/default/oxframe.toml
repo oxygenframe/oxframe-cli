@@ -1,0 +1,8 @@
+[dev]
+port = 3000
+open = true
+# "dev" or "release"
+profile = "dev"
+
+[render]
+# ffmpeg = "/path/to/ffmpeg"
