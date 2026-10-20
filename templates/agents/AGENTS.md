@@ -43,6 +43,13 @@ agent session (it never exits).
 4. Properties are `Signal<T>`: `.get()`, `.set(v)`, `.to(v, secs).ease(e)`, `.bind(move || ..)`.
 5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees. Prefer theme tokens (`Accent`, `.display()`, `.padding(Md)`, `Normal`) over hardcoded colors and sizes. Place with `.next_to(other, Side::Bottom)`, `.align_to(other, Edge::Top)`, `.to_edge(Edge::Top)`, `.center_in(other)` and `.width(pct(80))` instead of pixel guesses. `Project::aspects([Landscape, Portrait, Square])` and `view.is_portrait()` cover 16:9, 9:16 and 1:1. `Project::theme(...)` or `[theme]` in `oxframe.toml` restyles the whole video.
 
+## Camera
+
+For a big diagram or a close look at a detail: build it inside
+`view.add(Camera::new())`, then `cam.fit(node, padding, secs)`,
+`cam.center_on(node, secs)`, `cam.zoom().to(2.0, secs)`, `cam.reset(secs)`.
+Titles added to `view` stay on screen.
+
 ## Components
 
 Prefer these over drawing the block yourself. Each has `enter()`, `next()` and `exit()`.
@@ -73,5 +80,4 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
   `let (ax, bx) = (a.x(), b.x()); label.x().bind(move || (ax.get() + bx.get()) / 2.0);`
 - *"`()` is not an animation"*: a closure ending in `;` returns nothing. Drop the `;` (`|r| r.fade_in()`), or return `async move { a.await; b.await; }` for several steps.
 - `Signal::new(0.0)` ambiguous float: write `0.0f64`.
-- `Txt::text().to(..)` takes a `String`: `"new text".into()`.
 - `all` of a few different animations takes a **tuple** — note the double parentheses: `all((a, b))`.

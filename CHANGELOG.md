@@ -4,6 +4,15 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.4.0 — 2026-10-20
+
+- Creates projects on oxframe 0.4.0.
+- The agent files explain the `Camera` and that `.to(..)` takes theme tokens
+  and `&str` directly (no `.into()`).
+- The new-project template no longer writes `.to("…".into(), …)`. In an
+  existing project, `oxframe upgrade` to 0.4.0 needs the same edit: drop the
+  `.into()` inside `.to(..)`.
+
 ## 0.3.0 — 2026-10-20
 
 - Creates projects on oxframe 0.3.0 (`oxframe upgrade` moves existing ones).

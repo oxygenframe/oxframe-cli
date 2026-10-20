@@ -36,7 +36,7 @@ fn main() {
 
 ## Theme
 
-`Project::new("name").theme(Theme::dark().accent(color!("#68abdf")))` — also `Theme::light()`, `midnight`, `paper`, `vivid`. Colors: `Background Surface Text Muted Accent OnAccent Success Warning Danger` (`.fill(Accent)`, `.stroke(Muted)`). Type: `.display() .h1() .h2() .body() .caption() .code()`. Space and radius: `Xs Sm Md Lg Xl` (`.padding(Md)`, `.gap(Sm)`, `.margin(Lg)`, `.radius(Lg)`). Shadow: `.elevation(Md)`. Motion: `.to(v, Normal)` (`Fast`/`Slow` too); a color tween takes the token converted, `.fill().to(Accent.into(), Normal)`. `node.fade_in()` / `fade_out()` use the theme's normal duration. `[theme]` in `oxframe.toml` (`name`, `accent`) overrides the compiled theme. Text with no fill uses `Text`.
+`Project::new("name").theme(Theme::dark().accent(color!("#68abdf")))` — also `Theme::light()`, `midnight`, `paper`, `vivid`. Colors: `Background Surface Text Muted Accent OnAccent Success Warning Danger` (`.fill(Accent)`, `.stroke(Muted)`). Type: `.display() .h1() .h2() .body() .caption() .code()`. Space and radius: `Xs Sm Md Lg Xl` (`.padding(Md)`, `.gap(Sm)`, `.margin(Lg)`, `.radius(Lg)`). Shadow: `.elevation(Md)`. Motion: `.to(v, Normal)` (`Fast`/`Slow` too); a tween takes tokens directly, `.fill().to(Accent, Normal)`. `node.fade_in()` / `fade_out()` use the theme's normal duration. `[theme]` in `oxframe.toml` (`name`, `accent`) overrides the compiled theme. Text with no fill uses `Text`.
 
 Every node: `.name("title")` (readable in check/inspect; otherwise the `add` call site), `x y rotation scale(Vec2) opacity fill stroke line_width start end`
 (`start/end` trim outlines 0..1), `fill_gradient(Gradient) stroke_gradient dash(vec) dash_offset
@@ -48,6 +48,23 @@ builder, or `handle.add(builder)` for a handle. `node.remove()`, `node.reparent(
 ## Components
 
 `view.add(TitleCard::new("Binary search").subtitle("O(log n)"))`, `ChapterMarker::new("1  Search")`, `BulletList::new(["Take the middle", "Compare"])`, `CodeExplainer::new(src).step(1, 1, "the middle")`, `FlowDiagram::new().edge("Client", "API").down()`, `Callout::new(node).text("here")`, `LowerThird::new("Ada").role("walks the half")`, `EndCard::new("Done").note("thanks")`. All of them: `enter().await`, `next().await`, `exit().await`. They read the theme and the safe area.
+
+## Camera
+
+Zoom, pan and turn the view of everything added to the camera; nodes added
+to `view` stay on screen (titles, captions).
+
+```rust
+let cam = view.add(Camera::new());
+let diagram = cam.add(Group::new());            // build the world inside it
+cam.fit(diagram, 120.0, 0.0).await;             // show all of it (padding px, seconds)
+cam.center_on(node, 1.0).await;                 // bring a node to the middle
+cam.zoom().to(2.5, 1.0).await;                  // x(), y() (point looked at), zoom(), rotation()
+cam.x().bind(move || ball.x().get());           // follow a moving node
+cam.reset(1.2).await;                           // back to x = y = 0, zoom 1, rotation 0
+```
+
+`oxframe check` does not report `out_of_frame` for nodes inside a camera.
 
 ## Position
 

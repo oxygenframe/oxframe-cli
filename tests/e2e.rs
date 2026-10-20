@@ -58,6 +58,17 @@ async fn wait_for(ws: &mut Ws, timeout: Duration, mut pred: impl FnMut(&Event) -
             .expect("timed out waiting for event");
         if let Some(Ok(Message::Text(t))) = msg {
             let e: Event = serde_json::from_str(&t).unwrap();
+            // A build error will not turn into the awaited event: fail now
+            // with the compiler's message instead of at the timeout.
+            if let Event::Error {
+                kind: ErrorKind::Build,
+                message,
+                ..
+            } = &e
+                && !pred(&e)
+            {
+                panic!("the project failed to build:\n{message}");
+            }
             if pred(&e) {
                 return e;
             }
