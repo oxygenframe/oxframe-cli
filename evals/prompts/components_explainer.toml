@@ -1,0 +1,5 @@
+category = "components"
+prompt = "A 30-second explainer of how HTTPS works, built from the ready-made components (title card, bullet list, flow diagram, end card)."
+
+[expect]
+min_seconds = 15

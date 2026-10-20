@@ -1,0 +1,5 @@
+category = "algorithm"
+prompt = "Explain breadth-first search on a small graph of 7 nodes: draw the graph, then visit nodes level by level with a visible queue."
+
+[expect]
+min_seconds = 10

@@ -1,0 +1,5 @@
+category = "theme"
+prompt = "Make a 10-second intro in a light theme with the brand color #ff6b35 used as the accent everywhere."
+
+[expect]
+min_seconds = 5

@@ -1,0 +1,5 @@
+category = "algorithm"
+prompt = "A short video (about 15 s) explaining the two-pointer technique for finding a pair that sums to a target in a sorted array."
+
+[expect]
+min_seconds = 8

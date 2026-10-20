@@ -1,0 +1,5 @@
+category = "algorithm"
+prompt = "Animate bubble sort on 8 bars of different heights. Show each comparison and swap, and mark sorted bars in a different color."
+
+[expect]
+min_seconds = 10

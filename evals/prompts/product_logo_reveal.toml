@@ -1,0 +1,5 @@
+category = "product"
+prompt = "A 6-second logo reveal: a circle and a square draw on, merge into a simple mark, then the name \"Northwind\" types in next to it."
+
+[expect]
+min_seconds = 4

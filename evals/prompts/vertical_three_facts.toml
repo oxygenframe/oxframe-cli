@@ -1,0 +1,6 @@
+category = "vertical"
+prompt = "A 9:16 short: \"3 facts about Rust\", each fact on its own card that slides in."
+
+[expect]
+aspects = ["9:16"]
+min_seconds = 8

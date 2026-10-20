@@ -1,0 +1,6 @@
+category = "camera"
+prompt = "Show a system diagram with six services that does not fit on one screen: first the whole diagram, then zoom in on the API service, then back out."
+
+[expect]
+uses = ["Camera"]
+min_seconds = 8

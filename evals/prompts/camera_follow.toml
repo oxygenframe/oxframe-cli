@@ -1,0 +1,6 @@
+category = "camera"
+prompt = "A dot travels along a long winding path; the camera follows it while a title stays fixed on screen."
+
+[expect]
+uses = ["Camera"]
+min_seconds = 6

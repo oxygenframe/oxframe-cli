@@ -1,0 +1,5 @@
+category = "algorithm"
+prompt = "Visualize how a hash map stores 5 key-value pairs into 8 buckets, including one collision handled by chaining."
+
+[expect]
+min_seconds = 8

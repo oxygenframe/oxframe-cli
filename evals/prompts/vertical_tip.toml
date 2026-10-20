@@ -1,0 +1,6 @@
+category = "vertical"
+prompt = "A vertical 9:16 video for social media with a quick Rust tip: `?` operator for error propagation. Big readable text, about 12 seconds."
+
+[expect]
+aspects = ["9:16"]
+min_seconds = 8

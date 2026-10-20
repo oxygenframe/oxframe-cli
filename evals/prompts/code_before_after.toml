@@ -1,0 +1,6 @@
+category = "code_tutorial"
+prompt = "Show a slow O(n^2) duplicate check in Rust, then the HashSet version, and explain the difference in two short captions."
+
+[expect]
+uses = ["Code"]
+min_seconds = 8

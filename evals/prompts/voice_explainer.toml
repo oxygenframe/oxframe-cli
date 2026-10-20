@@ -1,0 +1,3 @@
+category = "voice"
+prompt = "A 20-second explainer with a voice-over: \"Binary search halves the problem every step.\" The animation should match the words."
+requires = "voice"

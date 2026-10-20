@@ -1,0 +1,3 @@
+category = "voice"
+prompt = "A code tutorial with narration where each highlighted line starts exactly on the word that mentions it."
+requires = "voice"

@@ -1,0 +1,6 @@
+category = "vertical"
+prompt = "Make the same 10-second title animation work in 16:9, 9:16 and 1:1 without separate layouts."
+
+[expect]
+aspects = ["16:9", "9:16", "1:1"]
+min_seconds = 6

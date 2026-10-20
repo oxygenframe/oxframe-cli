@@ -1,0 +1,5 @@
+category = "chart"
+prompt = "Show the share of four browsers as pie slices that appear one by one with percentages."
+
+[expect]
+min_seconds = 4

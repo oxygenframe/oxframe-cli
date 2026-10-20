@@ -1,0 +1,5 @@
+category = "product"
+prompt = "A 15-second product announcement for a CLI tool called \"shipit\": title card, three feature bullets appearing one by one, and an end card with the install command."
+
+[expect]
+min_seconds = 10

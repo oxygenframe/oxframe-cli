@@ -1,0 +1,6 @@
+category = "code_tutorial"
+prompt = "Explain what `let mid = lo + (hi - lo) / 2;` does and why it avoids overflow, focusing on parts of the expression one at a time."
+
+[expect]
+uses = ["Code"]
+min_seconds = 6

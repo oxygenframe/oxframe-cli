@@ -1,0 +1,5 @@
+category = "motion"
+prompt = "A 6x4 grid of squares pops in with a ripple from the top-left corner, then they all fade out together."
+
+[expect]
+min_seconds = 3

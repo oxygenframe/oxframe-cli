@@ -1,0 +1,5 @@
+category = "algorithm"
+prompt = "Make a 20-second video that explains binary search on a sorted array of 16 numbers: show the array, highlight the middle, discard half each step until the target is found."
+
+[expect]
+min_seconds = 12

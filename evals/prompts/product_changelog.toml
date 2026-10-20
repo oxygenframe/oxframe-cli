@@ -1,0 +1,5 @@
+category = "product"
+prompt = "Announce version 2.0 of a library: big version number, then four changes listed one after another, ending on a thank-you card."
+
+[expect]
+min_seconds = 8

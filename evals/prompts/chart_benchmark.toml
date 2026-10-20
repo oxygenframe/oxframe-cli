@@ -1,0 +1,5 @@
+category = "chart"
+prompt = "Animate a benchmark: four bars (Rust 1.2 s, Go 1.9 s, Java 2.4 s, Python 9.8 s) grow from zero with their values shown above them; the fastest is highlighted."
+
+[expect]
+min_seconds = 5

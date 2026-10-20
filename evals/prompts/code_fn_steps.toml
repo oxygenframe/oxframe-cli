@@ -1,0 +1,6 @@
+category = "code_tutorial"
+prompt = "A code tutorial: write a Rust function `fn average(xs: &[f64]) -> f64` step by step on screen, highlighting each line as it appears, with a caption explaining it."
+
+[expect]
+uses = ["Code"]
+min_seconds = 8

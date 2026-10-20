@@ -1,0 +1,5 @@
+category = "components"
+prompt = "An interview-style intro: a lower third with the name \"Ada Lovelace\" and the role \"First programmer\", then a chapter marker \"Part 1\"."
+
+[expect]
+min_seconds = 4

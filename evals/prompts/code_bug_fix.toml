@@ -1,0 +1,6 @@
+category = "code_tutorial"
+prompt = "Show a Rust snippet with an off-by-one bug in a loop, point at the bug with an arrow and a label, then show the fixed line."
+
+[expect]
+uses = ["Code"]
+min_seconds = 6

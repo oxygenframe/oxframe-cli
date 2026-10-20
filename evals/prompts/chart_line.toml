@@ -1,0 +1,5 @@
+category = "chart"
+prompt = "Plot monthly active users for 12 months as a line that draws itself from left to right, with axes and a label on the last point."
+
+[expect]
+min_seconds = 5
