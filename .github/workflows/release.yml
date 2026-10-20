@@ -76,7 +76,13 @@ jobs:
             if [ -e "$f" ]; then cosign sign-blob --yes "$f" --bundle "$f.cosign.bundle"; fi
           done
       - uses: actions/upload-artifact@v7
-        with: { name: "${{ matrix.target }}", path: "oxframe-*" }
+        # Only the release files: archives, checksums, signatures (not the
+        # staging directory the archive was made from).
+        with:
+          name: "${{ matrix.target }}"
+          path: |
+            oxframe-*.tar.gz*
+            oxframe-*.zip*
 
   publish:
     needs: build
