@@ -145,6 +145,7 @@ pub fn run(frames: bool) -> u8 {
     if frames {
         cmd.arg("--frames");
     }
+    cmd.args(cfg.theme.args());
     match cmd.status() {
         Ok(s) if s.success() => exit::OK,
         Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
@@ -189,6 +190,7 @@ pub fn inspect(at: f64, scene: Option<String>) -> u8 {
     if let Some(scene) = &scene {
         cmd.args(["--scene", scene]);
     }
+    cmd.args(cfg.theme.args());
     match cmd.status() {
         Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
         Err(e) => {

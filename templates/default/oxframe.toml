@@ -7,6 +7,10 @@ profile = "dev"
 [render]
 # ffmpeg = "/path/to/ffmpeg"
 
+[theme]
+# name = "dark"       # dark, light, midnight, paper, vivid
+# accent = "#68abdf"  # one brand color; the other colors stay readable
+
 [check]
 # interval = 1.0          # seconds between storyboard frames (markers are always included)
 # safe_inset = 48.0       # px; 0 turns the safe-area warning off

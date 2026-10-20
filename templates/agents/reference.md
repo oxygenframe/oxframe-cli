@@ -34,6 +34,10 @@ fn main() {
 | `Grid` | `.width .height .spacing` | `width height spacing` |
 | `Group` | — | — |
 
+## Theme
+
+`Project::new("name").theme(Theme::dark().accent(color!("#68abdf")))` — also `Theme::light()`, `midnight`, `paper`, `vivid`. Colors: `Background Surface Text Muted Accent OnAccent Success Warning Danger` (`.fill(Accent)`, `.stroke(Muted)`). Type: `.display() .h1() .h2() .body() .caption() .code()`. Space and radius: `Xs Sm Md Lg Xl` (`.padding(Md)`, `.gap(Sm)`, `.margin(Lg)`, `.radius(Lg)`). Shadow: `.elevation(Md)`. Motion: `.to(v, Normal)` (`Fast`/`Slow` too); a color tween takes the token converted, `.fill().to(Accent.into(), Normal)`. `node.fade_in()` / `fade_out()` use the theme's normal duration. `[theme]` in `oxframe.toml` (`name`, `accent`) overrides the compiled theme. Text with no fill uses `Text`.
+
 Every node: `.name("title")` (readable in check/inspect; otherwise the `add` call site), `x y rotation scale(Vec2) opacity fill stroke line_width start end`
 (`start/end` trim outlines 0..1), `fill_gradient(Gradient) stroke_gradient dash(vec) dash_offset
 line_cap line_join blur shadow(color, blur, (dx, dy)) glow(color, blur) clip(bool) blend(BlendMode)

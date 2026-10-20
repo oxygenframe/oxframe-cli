@@ -76,6 +76,7 @@ pub fn run(a: RenderArgs) -> u8 {
     if a.no_audio {
         cmd.arg("--no-audio");
     }
+    cmd.args(cfg.theme.args());
     match cmd.status() {
         Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
         Err(e) => {

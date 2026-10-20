@@ -150,6 +150,9 @@ impl Supervisor {
         if self.cpu {
             cmd.arg("--cpu");
         }
+        if let Ok(cfg) = crate::config::Config::load(&self.root) {
+            cmd.args(cfg.theme.args());
+        }
         let mut child = match cmd.spawn() {
             Ok(c) => c,
             Err(e) => {

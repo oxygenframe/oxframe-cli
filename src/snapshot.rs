@@ -53,6 +53,7 @@ pub fn run(a: SnapshotArgs) -> u8 {
         cmd.args(["--scene", s]);
     }
     cmd.args(["--size", a.size.as_deref().unwrap_or("960x540")]);
+    cmd.args(cfg.theme.args());
     match cmd.status() {
         Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
         Err(e) => {

@@ -35,7 +35,7 @@ agent session (it never exits).
 2. `s.x().to(300.0, 1.0).await;` — animate a property (target, seconds) and wait.
 3. `all((a, b, c)).await` — run together (tuples up to 12); `sequence(delay, vec_of_boxed)`; `wait_for(secs)`; `spawn(fut)` for background.
 4. Properties are `Signal<T>`: `.get()`, `.set(v)`, `.to(v, secs).ease(e)`, `.bind(move || ..)`.
-5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees.
+5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees. Prefer theme tokens (`Accent`, `.display()`, `.padding(Md)`, `Normal`) over hardcoded colors and sizes. `Project::theme(...)` or `[theme]` in `oxframe.toml` restyles the whole video.
 
 See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 

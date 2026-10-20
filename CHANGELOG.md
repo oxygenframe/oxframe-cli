@@ -4,6 +4,15 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.2.3 — 2026-10-20
+
+### Added
+
+- `[theme]` in `oxframe.toml` (`name`, `accent`) overrides the theme compiled
+  into the project for `dev`, `render`, `check`, `inspect` and `snapshot`.
+- Creates projects on oxframe 0.2.3 (`oxframe upgrade` moves existing ones).
+- Agent files mention theme tokens.
+
 ## 0.2.2 — 2026-10-20
 
 ### Added

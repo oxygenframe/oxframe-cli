@@ -10,6 +10,7 @@ pub struct Config {
     pub dev: Dev,
     pub render: Render,
     pub check: Check,
+    pub theme: ThemeFile,
     /// Binary target to run when the package has several.
     pub bin: Option<String>,
 }
@@ -59,6 +60,32 @@ pub struct Check {
     pub min_chars: u32,
     /// Storyboard cell width in pixels.
     pub cell_width: u32,
+}
+
+/// Optional `[theme]` in `oxframe.toml`. Overrides the theme compiled into the project.
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct ThemeFile {
+    /// `dark`, `light`, `midnight`, `paper` or `vivid`.
+    pub name: Option<String>,
+    /// Brand color, `#rrggbb`. The rest of the palette is derived from it.
+    pub accent: Option<String>,
+}
+
+impl ThemeFile {
+    /// Flags forwarded to the project binary.
+    pub fn args(&self) -> Vec<String> {
+        let mut args = Vec::new();
+        if let Some(name) = &self.name {
+            args.push("--theme".into());
+            args.push(name.clone());
+        }
+        if let Some(accent) = &self.accent {
+            args.push("--accent".into());
+            args.push(accent.clone());
+        }
+        args
+    }
 }
 
 impl Default for Check {

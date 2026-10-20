@@ -11,7 +11,7 @@ const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
 
 /// SDK version this CLI is made for (pinned in generated projects).
-pub const SDK_VERSION: &str = "0.2.2";
+pub const SDK_VERSION: &str = "0.2.3";
 
 fn valid_name(name: &str) -> bool {
     !name.is_empty()
@@ -91,7 +91,7 @@ mod tests {
         generate(&dir, "demo", None).unwrap();
         let cargo = std::fs::read_to_string(dir.join("Cargo.toml")).unwrap();
         assert!(cargo.contains("name = \"demo\""));
-        assert!(cargo.contains("version = \"=0.2.2\""));
+        assert!(cargo.contains("version = \"=0.2.3\""));
         assert!(cargo.contains("opt-level = 2"));
         assert!(
             std::fs::read_to_string(dir.join("src/main.rs"))
