@@ -89,7 +89,7 @@ fn tools() -> Vec<Value> {
         ),
         tool(
             "inspect",
-            "Scene tree at one time: kind, name, bounds, text and file:line.",
+            "Scene tree at one time: kind, name, bounds, text and file:line. While a transition is playing, also kind, direction and progress.",
             json!({
                 "type": "object",
                 "properties": {

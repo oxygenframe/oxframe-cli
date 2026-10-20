@@ -14,7 +14,7 @@ version — the API changes between versions:
 ## Layout
 
 - `src/main.rs` — scenes (`#[oxframe::scene] async fn name(view: View)`) and `main()` with `Project::new(..).scene(..).main()`.
-- `src/<scene>.meta.json` — markers, eases, tunables edited in the editor. **Do not hand-edit unless asked; never delete keys.**
+- `src/<scene>.meta.json` — markers, eases, tunables and transition length edited in the editor. **Do not hand-edit unless asked; never delete keys.**
 - `oxframe.toml` — settings for the `oxframe` CLI. `assets/` — images, audio.
 
 ## Commands (run from the project root)
@@ -22,7 +22,7 @@ version — the API changes between versions:
 | Goal | Command |
 |---|---|
 | **Check a change** (compile, then look) | `oxframe check` → `out/check/storyboard.png` and `out/check/report.json`. Exit 1 if any issue is an error. |
-| Scene tree at one time | `oxframe inspect --at 2.5` (JSON: kind, name, bounds, text, `file:line`) |
+| Scene tree at one time | `oxframe inspect --at 2.5` (JSON: kind, name, bounds, text, `file:line`; `transition` with kind and progress while one is playing) |
 | One full-size still | `oxframe snapshot --at 1.5` → prints the PNG path |
 | Scene length, markers | `cargo run -q -- info` (JSON) |
 | Final video | `oxframe render` → `out/<project>.mp4` (needs ffmpeg) |
@@ -42,6 +42,10 @@ agent session (it never exits).
 3. `all((a, b, c)).await` — run together (a tuple, or `all(items.iter().map(|x| x.fade_in()))`); `stagger(0.1, &items, |x| x.pop_in()).await` — one after another; `wait_for(secs)`; `spawn(fut)` for background. Never `Box::pin` or `BoxFuture`.
 4. Properties are `Signal<T>`: `.get()`, `.set(v)`, `.to(v, secs).ease(e)`, `.bind(move || ..)`.
 5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees. Prefer theme tokens (`Accent`, `.display()`, `.padding(Md)`, `Normal`) over hardcoded colors and sizes. Place with `.next_to(other, Side::Bottom)`, `.align_to(other, Edge::Top)`, `.to_edge(Edge::Top)`, `.center_in(other)` and `.width(pct(80))` instead of pixel guesses. `Project::aspects([Landscape, Portrait, Square])` and `view.is_portrait()` cover 16:9, 9:16 and 1:1. `Project::theme(...)` or `[theme]` in `oxframe.toml` restyles the whole video.
+
+## Transitions
+
+`transition(Transition::slide(Dir::Left)).await` at the start of a scene (not the first) blends the previous scene's last frame over this one for the theme's normal duration. Also `fade`, `wipe(Dir::…)`, `zoom_in`, `zoom_out`, `.duration(0.6)`, `.ease(...)`, `.overlap()`, and `Transition::custom(|t| Blend { ... })`. Nodes added before the call are visible during the blend.
 
 ## Camera
 

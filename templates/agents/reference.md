@@ -17,6 +17,26 @@ fn main() {
 }
 ```
 
+## Transitions
+
+At the start of any scene except the first:
+
+```rust
+transition(Transition::slide(Dir::Left)).await;          // theme duration and enter easing
+transition(Transition::fade().duration(0.6).ease(presets::LINEAR)).await;
+transition(Transition::wipe(Dir::Right).overlap()).await; // previous scene keeps playing
+transition(Transition::zoom_in()).await;
+transition(Transition::zoom_out()).await;
+transition(Transition::custom(|t| Blend {                 // t is eased progress, 0..=1
+    from: LayerPose::new().opacity(1.0 - t),
+    to: LayerPose::new().opacity(t).offset(1.0 - t, 0.0),
+    incoming_on_top: true,
+    mix: false,
+})).await;
+```
+
+`Dir` is `Left`, `Right`, `Up`, `Down`. The call waits, so nodes added before it show during the blend and nodes added after show when it ends. The first scene ignores it. Length is stored in `meta.json` under `transition.seconds` and the timeline can drag it. `oxframe render --scene name` draws that scene without the blend into it. `oxframe check` puts a blend frame on the storyboard. `oxframe inspect` adds `"transition": { "kind", "dir", "progress", "overlap" }` while one is running.
+
 ## Nodes (builder → `view.add(..)` / `parent.add(..)` → Copy handle)
 
 | Node | Builder | Handle signals |

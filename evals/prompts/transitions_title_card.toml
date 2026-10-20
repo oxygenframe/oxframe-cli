@@ -1,0 +1,7 @@
+category = "product"
+prompt = "Two scenes. First a title card that says \"oxframe\", held for a moment. Then slide left into an end card that says \"Thanks for watching\"."
+requires = "transitions"
+
+[expect]
+uses = ["Transition", "EndCard"]
+min_seconds = 2

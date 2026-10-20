@@ -1,0 +1,7 @@
+category = "product"
+prompt = "Three short scenes for a product called \"Lumen\": a title, three feature bullets, and an end card with the install command. Fade between the title and the bullets, then wipe left into the end card."
+requires = "transitions"
+
+[expect]
+uses = ["Transition", "BulletList", "EndCard"]
+min_seconds = 6

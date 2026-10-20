@@ -4,6 +4,13 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.6.0 — 2026-10-21
+
+- Creates projects on oxframe 0.6.0.
+- The agent cheat sheet and instructions describe scene transitions:
+  `transition(Transition::slide(Dir::Left)).await`, the other built-ins,
+  and a custom blend.
+
 ## 0.5.0 — 2026-10-20
 
 - Creates projects on oxframe 0.5.0.
