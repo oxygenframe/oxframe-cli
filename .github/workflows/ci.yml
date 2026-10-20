@@ -59,7 +59,11 @@ jobs:
       - uses: actions/checkout@v7
         with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
       - run: mv oxframe-sdk ../oxframe-sdk
-      - uses: EmbarkStudios/cargo-deny-action@v2
+      # Not cargo-deny-action: it runs in a container that only mounts this
+      # repository, so ../oxframe-sdk would be missing.
+      - uses: taiki-e/install-action@v2
+        with: { tool: cargo-deny }
+      - run: cargo deny --all-features check
 
   nightly-issue:
     if: failure() && github.event_name == 'schedule'
