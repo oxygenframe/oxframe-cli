@@ -89,8 +89,21 @@ enum Cmd {
         #[arg(long)]
         no_audio: bool,
     },
-    /// Type-check, validate meta files and compare protocol versions.
-    Check,
+    /// Type-check, then write a storyboard and a visual-lint report to out/check/.
+    Check {
+        /// Also write each storyboard frame at full size under out/check/frames/.
+        #[arg(long)]
+        frames: bool,
+    },
+    /// Print the scene tree at a time as JSON (kind, name, bounds, text).
+    Inspect {
+        /// Time in seconds.
+        #[arg(long)]
+        at: f64,
+        /// Time is measured from the start of this scene.
+        #[arg(long)]
+        scene: Option<String>,
+    },
     /// Render single frames as PNG (default: out/snapshots/), e.g. `--at 1.5`.
     Snapshot {
         /// Time in seconds (repeatable).
@@ -167,7 +180,8 @@ fn main() -> ExitCode {
             cpu,
             no_audio,
         }),
-        Cmd::Check => check::run(),
+        Cmd::Check { frames } => check::run(frames),
+        Cmd::Inspect { at, scene } => check::inspect(at, scene),
         Cmd::Snapshot {
             at,
             out,

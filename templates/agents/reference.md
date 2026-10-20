@@ -34,7 +34,7 @@ fn main() {
 | `Grid` | `.width .height .spacing` | `width height spacing` |
 | `Group` | — | — |
 
-Every node: `x y rotation scale(Vec2) opacity fill stroke line_width start end`
+Every node: `.name("title")` (readable in check/inspect; otherwise the `add` call site), `x y rotation scale(Vec2) opacity fill stroke line_width start end`
 (`start/end` trim outlines 0..1), `fill_gradient(Gradient) stroke_gradient dash(vec) dash_offset
 line_cap line_join blur shadow(color, blur, (dx, dy)) glow(color, blur) clip(bool) blend(BlendMode)
 z_index anchor((ax, ay))`, and inside a `Layout`: `grow shrink basis margin align_self`.
@@ -79,5 +79,7 @@ x.to(1.0, 1.0).ease(ease!("slide"));     // curve editor; ease!("slide", presets
 
 ## Rendering
 
+`oxframe check [--frames]` — storyboard and `report.json` in `out/check/`. `--frames` also writes full-size PNGs. Thresholds live in `oxframe.toml` `[check]`. Errors exit 1.
+`oxframe inspect --at <seconds> [--scene s]` — JSON scene tree at that time.
 `oxframe render [--out out.mp4|.webm|.mov|dir] [--format mp4|webm|prores|png] [--scene s] [--range 1..3] [--size 1280x720] [--cpu]`
 `oxframe snapshot --at <seconds> [--at …] [--scene s] [--size WxH] [--out file.png]`

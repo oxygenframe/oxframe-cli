@@ -6,3 +6,13 @@ profile = "dev"
 
 [render]
 # ffmpeg = "/path/to/ffmpeg"
+
+[check]
+# interval = 1.0          # seconds between storyboard frames (markers are always included)
+# safe_inset = 48.0       # px; 0 turns the safe-area warning off
+# min_contrast = 4.5      # WCAG; text below this is an error
+# min_motion = 0.15       # a large move shorter than this is a warning
+# max_still = 3.0         # a pause this long, with no soundtrack, is a warning
+# chars_per_second = 20.0
+# min_chars = 24
+# cell_width = 320

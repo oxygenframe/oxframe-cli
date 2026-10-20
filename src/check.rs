@@ -1,4 +1,4 @@
-//! `oxframe check`: cargo check, meta validation, version agreement.
+//! `oxframe check`: cargo check, meta validation, version agreement, visual lint.
 
 use std::path::Path;
 use std::process::Command;
@@ -7,7 +7,7 @@ use oxframe_protocol::{Meta, PROTOCOL_VERSION};
 
 use crate::{cargo, config, exit, render, ui};
 
-pub fn run() -> u8 {
+pub fn run(frames: bool) -> u8 {
     let root = match config::project_root() {
         Ok(r) => r,
         Err(e) => {
@@ -61,7 +61,8 @@ pub fn run() -> u8 {
         Ok(b) if b.success => b,
         _ => return exit::BUILD,
     };
-    let sdk = build.executable.and_then(|exe| {
+    let exe = build.executable.clone();
+    let sdk = exe.as_ref().and_then(|exe| {
         let out = Command::new(exe)
             .current_dir(&root)
             .arg("info")
@@ -104,10 +105,97 @@ pub fn run() -> u8 {
             render::FFMPEG_HELP
         );
     }
-    if code == exit::OK {
-        crate::note("all good");
+    if code != exit::OK {
+        return code;
     }
-    code
+    let Some(exe) = exe else {
+        crate::error("build produced no binary to visually check");
+        return exit::BUILD;
+    };
+    crate::note("visual check");
+    let mut cmd = Command::new(exe);
+    cmd.current_dir(&root).arg("check");
+    let c = &cfg.check;
+    let interval = c.interval.to_string();
+    let inset = c.safe_inset.to_string();
+    let contrast = c.min_contrast.to_string();
+    let motion = c.min_motion.to_string();
+    let still = c.max_still.to_string();
+    let cps = c.chars_per_second.to_string();
+    let chars = c.min_chars.to_string();
+    let cell = c.cell_width.to_string();
+    cmd.args([
+        "--interval",
+        &interval,
+        "--safe-inset",
+        &inset,
+        "--min-contrast",
+        &contrast,
+        "--min-motion",
+        &motion,
+        "--max-still",
+        &still,
+        "--chars-per-second",
+        &cps,
+        "--min-chars",
+        &chars,
+        "--cell-width",
+        &cell,
+    ]);
+    if frames {
+        cmd.arg("--frames");
+    }
+    match cmd.status() {
+        Ok(s) if s.success() => exit::OK,
+        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+        Err(e) => {
+            crate::error(format!("cannot run the project binary: {e}"));
+            exit::ENV
+        }
+    }
+}
+
+/// `oxframe inspect --at <seconds>`.
+pub fn inspect(at: f64, scene: Option<String>) -> u8 {
+    let root = match config::project_root() {
+        Ok(r) => r,
+        Err(e) => {
+            crate::error(e);
+            return exit::ENV;
+        }
+    };
+    let cfg = match config::Config::load(&root) {
+        Ok(c) => c,
+        Err(e) => {
+            crate::error(e);
+            return exit::ENV;
+        }
+    };
+    let build = match cargo::build(&root, false, cfg.bin.as_deref()) {
+        Ok(b) if b.success => b,
+        Ok(_) => return exit::BUILD,
+        Err(e) => {
+            crate::error(format!("cannot run cargo: {e}"));
+            return exit::ENV;
+        }
+    };
+    let Some(exe) = build.executable else {
+        crate::error("build produced no binary");
+        return exit::BUILD;
+    };
+    let mut cmd = Command::new(exe);
+    cmd.current_dir(&root)
+        .args(["inspect", "--at", &at.to_string()]);
+    if let Some(scene) = &scene {
+        cmd.args(["--scene", scene]);
+    }
+    match cmd.status() {
+        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+        Err(e) => {
+            crate::error(format!("cannot run the project binary: {e}"));
+            exit::ENV
+        }
+    }
 }
 
 fn collect_meta(dir: &Path, out: &mut Vec<std::path::PathBuf>) {

@@ -10,7 +10,8 @@ cargo install oxframe-cli          # or: curl -fsSL …/install.sh | sh
 oxframe init hello && cd hello
 oxframe dev --open                 # editor on http://127.0.0.1:3000/?token=…
 oxframe render                     # out/hello.mp4
-oxframe check                      # cargo check + meta + protocol versions
+oxframe check                      # compile, then storyboard + report.json
+oxframe inspect --at 2.5           # scene tree at that time, as JSON
 oxframe snapshot --at 1.5          # one frame as PNG in out/snapshots/
 oxframe agents                     # refresh AGENTS.md and the Claude Code skill
 oxframe upgrade                    # move the project to this CLI's SDK version
@@ -23,7 +24,7 @@ cargo install oxframe-cli --force  # the CLI
 oxframe upgrade                    # then, in each project: SDK pin, Cargo.lock, agent files
 ```
 
-Projects pin the SDK (`oxframe = "=0.2.1"`), so a new release never changes
+Projects pin the SDK (`oxframe = "=0.2.2"`), so a new release never changes
 an existing project by itself. Once a day the CLI checks crates.io in the
 background (`cargo search`) and mentions a newer version; set
 `OXFRAME_NO_UPDATE_CHECK=1` to turn that off (it is off on CI).
@@ -34,7 +35,7 @@ Full reference: <https://oxframe.dev/docs/cli>.
 
 `oxframe init` writes `AGENTS.md`, `CLAUDE.md` (`@AGENTS.md`) and a skill in
 `.claude/skills/oxframe/` (workflow + API cheat sheet). They tell agents to
-verify visual changes with `oxframe snapshot` and never to run `oxframe dev`.
+verify visual changes with `oxframe check` (storyboard and `report.json`) and never to run `oxframe dev`.
 `oxframe agents` refreshes them after an upgrade; files without the
 `oxframe-agents` marker (edited by you) are kept unless `--force`.
 

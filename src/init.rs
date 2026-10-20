@@ -11,7 +11,7 @@ const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
 
 /// SDK version this CLI is made for (pinned in generated projects).
-pub const SDK_VERSION: &str = "0.2.1";
+pub const SDK_VERSION: &str = "0.2.2";
 
 fn valid_name(name: &str) -> bool {
     !name.is_empty()
@@ -67,7 +67,7 @@ pub fn run(name: &str, sdk_path: Option<&Path>) -> u8 {
     }
     crate::note(format!("created `{name}`"));
     anstream::eprintln!(
-        "\n  cd {name}\n  oxframe dev                 # editor with hot reload\n  oxframe snapshot --at 1     # one frame as PNG\n  oxframe render              # out/{name}.mp4\n\nAI agents: AGENTS.md and .claude/skills/oxframe explain the project to them.\n"
+        "\n  cd {name}\n  oxframe dev                 # editor with hot reload\n  oxframe check               # storyboard + report.json\n  oxframe snapshot --at 1     # one frame as PNG\n  oxframe render              # out/{name}.mp4\n\nAI agents: AGENTS.md and .claude/skills/oxframe explain the project to them.\n"
     );
     exit::OK
 }
@@ -91,7 +91,7 @@ mod tests {
         generate(&dir, "demo", None).unwrap();
         let cargo = std::fs::read_to_string(dir.join("Cargo.toml")).unwrap();
         assert!(cargo.contains("name = \"demo\""));
-        assert!(cargo.contains("version = \"=0.2.1\""));
+        assert!(cargo.contains("version = \"=0.2.2\""));
         assert!(cargo.contains("opt-level = 2"));
         assert!(
             std::fs::read_to_string(dir.join("src/main.rs"))

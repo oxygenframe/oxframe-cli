@@ -4,6 +4,19 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.2.2 — 2026-10-20
+
+### Added
+
+- `oxframe check` now also lints the picture: it writes `out/check/storyboard.png`
+  and `report.json` (rule, severity, time, node, `file:line`, hint) and exits 1
+  when any issue is an error. `--frames` saves the storyboard cells at full size.
+  Thresholds are `[check]` in `oxframe.toml`.
+- `oxframe inspect --at <seconds>` prints the scene tree at that time as JSON.
+- Agent files (`AGENTS.md`, the Claude skill) tell the agent to run `oxframe check`
+  and read the storyboard after every visual change, and to name nodes with `.name()`.
+- Creates projects on oxframe 0.2.2 (`oxframe upgrade` moves existing ones).
+
 ## 0.2.1 — 2026-10-20
 
 - Creates projects on oxframe 0.2.1 (`oxframe upgrade` moves existing ones).
