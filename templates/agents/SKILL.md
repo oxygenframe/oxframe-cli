@@ -5,6 +5,9 @@ description: Write and edit oxframe animation scenes (Rust, `#[oxframe::scene]`)
 <!-- oxframe-agents {{VERSION}} -->
 # oxframe scenes
 
+The project is on oxframe {{SDK_VERSION}}: docs https://oxframe.dev/docs/{{DOCS_SERIES}},
+API https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/.
+
 ## Workflow
 
 1. Read `src/main.rs` and the scene's `src/<scene>.meta.json` (markers/tunables already tuned by a human — keep them).

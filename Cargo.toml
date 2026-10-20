@@ -12,7 +12,7 @@ readme = "README.md"
 keywords = ["animation", "motion-graphics", "video", "cli", "hot-reload"]
 categories = ["command-line-utilities", "multimedia::video", "graphics"]
 # ui/dist is part of the package: `cargo install` never touches the network.
-include = ["src/**", "templates/**", "ui/dist/**", "ui.lock", "Cargo.toml", "README.md", "LICENSE-*"]
+include = ["src/**", "templates/**", "ui/dist/**", "ui.lock", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE-*"]
 
 [[bin]]
 name = "oxframe"

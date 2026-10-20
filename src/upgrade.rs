@@ -33,25 +33,7 @@ pub fn plan(cargo_toml: &str) -> anyhow::Result<(Plan, String)> {
         .and_then(|d| d.get_mut("oxframe"))
         .filter(|d| !d.is_none())
         .ok_or_else(|| anyhow::anyhow!("Cargo.toml has no `oxframe` dependency"))?;
-    let version = match dep {
-        Item::Value(Value::String(s)) => Some(s.value().clone()),
-        Item::Value(Value::InlineTable(t)) => {
-            if t.contains_key("path") || t.contains_key("git") {
-                None
-            } else {
-                t.get("version").and_then(|v| v.as_str()).map(str::to_owned)
-            }
-        }
-        Item::Table(t) => {
-            if t.contains_key("path") || t.contains_key("git") {
-                None
-            } else {
-                t.get("version").and_then(|v| v.as_str()).map(str::to_owned)
-            }
-        }
-        _ => None,
-    };
-    let Some(req) = version else {
+    let Some(req) = requirement(dep) else {
         return Ok((Plan::Local, cargo_toml.to_owned()));
     };
     let current = req.trim_start_matches(['=', '^', '~', ' ']).to_owned();
@@ -81,6 +63,29 @@ pub fn plan(cargo_toml: &str) -> anyhow::Result<(Plan, String)> {
         _ => unreachable!("checked above"),
     }
     Ok((Plan::Upgrade(current), doc.to_string()))
+}
+
+/// The version requirement of an `oxframe` dependency (`"=0.1.0"`); `None`
+/// for path and git dependencies.
+fn requirement(dep: &Item) -> Option<String> {
+    let local = |t: &dyn toml_edit::TableLike| t.contains_key("path") || t.contains_key("git");
+    match dep {
+        Item::Value(Value::String(s)) => Some(s.value().clone()),
+        Item::Value(Value::InlineTable(t)) if !local(t) => {
+            t.get("version").and_then(|v| v.as_str()).map(str::to_owned)
+        }
+        Item::Table(t) if !local(t) => t.get("version").and_then(|v| v.as_str()).map(str::to_owned),
+        _ => None,
+    }
+}
+
+/// The oxframe version a project is pinned to (`"0.1.0"`), if its
+/// Cargo.toml names one.
+pub fn project_sdk_version(cargo_toml: &str) -> Option<String> {
+    let doc: DocumentMut = cargo_toml.parse().ok()?;
+    let req = requirement(doc.get("dependencies")?.get("oxframe")?)?;
+    let v = req.trim_start_matches(['=', '^', '~', ' ']);
+    parse_version(v).map(|_| v.to_owned())
 }
 
 pub fn run() -> u8 {
@@ -163,6 +168,24 @@ mod tests {
 
     fn with_dep(dep: &str) -> String {
         format!("[package]\nname = \"demo\"\n\n[dependencies]\n# the SDK\n{dep}\nserde = \"1\"\n")
+    }
+
+    #[test]
+    fn reads_the_projects_sdk_version() {
+        assert_eq!(
+            project_sdk_version(&with_dep("oxframe = \"=0.2.1\"")).as_deref(),
+            Some("0.2.1")
+        );
+        assert_eq!(
+            project_sdk_version(&with_dep("oxframe = { version = \"0.1\", features = [] }")),
+            None,
+            "not a full version"
+        );
+        assert_eq!(
+            project_sdk_version(&with_dep("oxframe = { path = \"../sdk\" }")),
+            None
+        );
+        assert_eq!(project_sdk_version("not toml ["), None);
     }
 
     #[test]

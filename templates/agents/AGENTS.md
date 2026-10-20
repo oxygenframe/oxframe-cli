@@ -2,7 +2,13 @@
 # Instructions for AI coding agents
 
 This is an **oxframe** project: procedural animation in Rust. Scenes are
-`async fn`s; every `.await` on an animation takes time. Docs: https://oxframe.dev/docs
+`async fn`s; every `.await` on an animation takes time.
+
+This project uses **oxframe {{SDK_VERSION}}**. Use the docs of exactly this
+version — the API changes between versions:
+
+- Guide: https://oxframe.dev/docs/{{DOCS_SERIES}}
+- API reference: https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/
 
 ## Layout
 

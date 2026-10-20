@@ -13,9 +13,16 @@ const REFERENCE_MD: &str = include_str!("../templates/agents/reference.md");
 /// Version marker inside the generated files.
 const MARKER: &str = "oxframe-agents ";
 
-fn files() -> [(&'static str, String); 4] {
+/// The files for a project on oxframe `sdk` (links point at that version's
+/// docs, so agents never write code against another version's API).
+fn files(sdk: &str) -> [(&'static str, String); 4] {
     let v = env!("CARGO_PKG_VERSION");
-    let fill = |t: &str| t.replace("{{VERSION}}", v);
+    let series = sdk.split('.').take(2).collect::<Vec<_>>().join(".");
+    let fill = |t: &str| {
+        t.replace("{{VERSION}}", v)
+            .replace("{{SDK_VERSION}}", sdk)
+            .replace("{{DOCS_SERIES}}", &series)
+    };
     [
         ("AGENTS.md", fill(AGENTS_MD)),
         ("CLAUDE.md", fill(CLAUDE_MD)),
@@ -39,7 +46,12 @@ pub struct Report {
 /// marker) are kept unless `force`.
 pub fn write(dir: &Path, force: bool) -> std::io::Result<Report> {
     let mut report = Report::default();
-    for (rel, content) in files() {
+    // The project's pinned SDK, else the one this CLI creates projects with.
+    let sdk = std::fs::read_to_string(dir.join("Cargo.toml"))
+        .ok()
+        .and_then(|t| crate::upgrade::project_sdk_version(&t))
+        .unwrap_or_else(|| crate::init::SDK_VERSION.to_owned());
+    for (rel, content) in files(&sdk) {
         let path = dir.join(rel);
         if let Ok(existing) = std::fs::read_to_string(&path) {
             if existing == content {
@@ -114,5 +126,21 @@ mod tests {
         assert_eq!(r.written, vec!["AGENTS.md"]);
         assert_eq!(r.skipped, vec!["CLAUDE.md"]);
         assert_eq!(write(tmp.path(), true).unwrap().written, vec!["CLAUDE.md"]);
+    }
+
+    #[test]
+    fn links_the_docs_of_the_projects_version() {
+        let tmp = tempfile::tempdir().unwrap();
+        std::fs::write(
+            tmp.path().join("Cargo.toml"),
+            "[package]\nname = \"a\"\n\n[dependencies]\noxframe = { version = \"=0.3.2\" }\n",
+        )
+        .unwrap();
+        write(tmp.path(), false).unwrap();
+        let agents = std::fs::read_to_string(tmp.path().join("AGENTS.md")).unwrap();
+        assert!(agents.contains("oxframe 0.3.2"));
+        assert!(agents.contains("https://oxframe.dev/docs/0.3\n"));
+        assert!(agents.contains("https://docs.rs/oxframe/0.3.2/oxframe/"));
+        assert!(!agents.contains("{{"));
     }
 }
