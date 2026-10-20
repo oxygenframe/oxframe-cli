@@ -4,6 +4,22 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.2.6 — 2026-10-20
+
+### Added
+
+- `oxframe mcp`, an MCP server on stdin and stdout. Tools: `check`,
+  `storyboard`, `render_frame`, `inspect`, `list_components`, `docs_search`
+  and `render`. Newline-delimited JSON-RPC, and `Content-Length` frames.
+- `--json` on every command. One object on stdout. A compile error carries
+  the compiler text and a hint for the mistakes agents make most often: a
+  forgotten `.await`, a type mismatch, a method on the wrong value, a missing
+  type, a builder never passed to `add`, a name outside the prelude, the
+  wrong number of arguments, a builder used after `add`, `all` without its
+  tuple, and a text tween given an `&str`.
+- Agent files link `llms.txt` and `llms-full.txt` for the project's docs series.
+- Creates projects on oxframe 0.2.6 (`oxframe upgrade` moves existing ones).
+
 ## 0.2.5 — 2026-10-20
 
 ### Added

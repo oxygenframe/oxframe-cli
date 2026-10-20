@@ -8,6 +8,7 @@ This project uses **oxframe {{SDK_VERSION}}**. Use the docs of exactly this
 version — the API changes between versions:
 
 - Guide: https://oxframe.dev/docs/{{DOCS_SERIES}}
+- Docs for models: https://oxframe.dev/docs/{{DOCS_SERIES}}/llms.txt and https://oxframe.dev/docs/{{DOCS_SERIES}}/llms-full.txt
 - API reference: https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/
 
 ## Layout
@@ -25,6 +26,11 @@ version — the API changes between versions:
 | One full-size still | `oxframe snapshot --at 1.5` → prints the PNG path |
 | Scene length, markers | `cargo run -q -- info` (JSON) |
 | Final video | `oxframe render` → `out/<project>.mp4` (needs ffmpeg) |
+
+Add `--json` to any command for one JSON object on stdout (`ok`, `exit`, and
+on a compile error `diagnostics` plus `hints`). `oxframe mcp` is an MCP server
+on stdio with tools `check`, `storyboard`, `render_frame`, `inspect`,
+`list_components`, `docs_search` and `render`.
 
 `oxframe dev` is an interactive editor server for humans; do not run it in an
 agent session (it never exits).

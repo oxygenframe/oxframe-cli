@@ -13,6 +13,8 @@ pub struct BuildOutput {
     /// Plain-text compiler output (errors and warnings), for the editor.
     pub messages: String,
     pub spans: Vec<Span>,
+    /// Fixes for the mistakes agents make most often.
+    pub hints: Vec<crate::hints::Hint>,
 }
 
 #[derive(Deserialize)]
@@ -44,6 +46,13 @@ struct Diagnostic {
     #[serde(default)]
     spans: Vec<DiagSpan>,
     message: String,
+    #[serde(default)]
+    code: Option<DiagCode>,
+}
+
+#[derive(Deserialize)]
+struct DiagCode {
+    code: String,
 }
 
 #[derive(Deserialize)]
@@ -56,9 +65,32 @@ struct DiagSpan {
 
 /// `cargo build` in `root`, streaming colored diagnostics to the terminal.
 pub fn build(root: &Path, release: bool, bin: Option<&str>) -> std::io::Result<BuildOutput> {
+    compile(root, false, release, bin, false)
+}
+
+/// `cargo build` that keeps diagnostics in [`BuildOutput`] and does not print them.
+pub fn build_quiet(root: &Path, release: bool, bin: Option<&str>) -> std::io::Result<BuildOutput> {
+    compile(root, false, release, bin, true)
+}
+
+/// `cargo check` in `root`. `quiet` keeps the diagnostics off the terminal.
+pub fn check(root: &Path, bin: Option<&str>, quiet: bool) -> std::io::Result<BuildOutput> {
+    compile(root, true, false, bin, quiet)
+}
+
+fn compile(
+    root: &Path,
+    check_only: bool,
+    release: bool,
+    bin: Option<&str>,
+    quiet: bool,
+) -> std::io::Result<BuildOutput> {
     let mut cmd = Command::new(cargo());
     cmd.current_dir(root)
-        .args(["build", "--message-format=json-diagnostic-rendered-ansi"])
+        .args([
+            if check_only { "check" } else { "build" },
+            "--message-format=json-diagnostic-rendered-ansi",
+        ])
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit());
     if release {
@@ -78,6 +110,7 @@ pub fn build(root: &Path, release: bool, bin: Option<&str>) -> std::io::Result<B
         executable: None,
         messages: String::new(),
         spans: Vec::new(),
+        hints: Vec::new(),
     };
     for line in BufReader::new(stdout).lines() {
         let line = line?;
@@ -88,9 +121,19 @@ pub fn build(root: &Path, release: bool, bin: Option<&str>) -> std::io::Result<B
             "compiler-message" => {
                 let Some(d) = msg.message else { continue };
                 if let Some(r) = &d.rendered {
-                    anstream::eprint!("{r}");
+                    if !quiet {
+                        anstream::eprint!("{r}");
+                    }
                     if d.level == "error" || d.level == "warning" {
                         out.messages.push_str(&strip_ansi(r));
+                    }
+                }
+                if d.level == "error" || d.level == "warning" {
+                    let code = d.code.as_ref().map(|c| c.code.as_str());
+                    if let Some(hint) = crate::hints::attach(code, &d.message)
+                        && !out.hints.iter().any(|e| e.hint == hint.hint)
+                    {
+                        out.hints.push(hint);
                     }
                 }
                 if d.level == "error" {

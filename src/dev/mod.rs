@@ -15,7 +15,8 @@ mod server;
 mod supervisor;
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 
 use crate::ui::UiSource;
 use crate::{config, exit};
@@ -27,22 +28,17 @@ pub struct DevArgs {
     pub release: bool,
     pub ui_dir: Option<PathBuf>,
     pub cpu: bool,
+    pub json: bool,
 }
 
-pub fn run(args: DevArgs) -> u8 {
+pub fn run(args: DevArgs) -> crate::reply::Done {
     let root = match config::project_root() {
         Ok(r) => r,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(args.json, exit::ENV, e),
     };
     let cfg = match config::Config::load(&root) {
         Ok(c) => c,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(args.json, exit::ENV, e),
     };
     let port = args.port.unwrap_or(cfg.dev.port);
     let release = args.release || cfg.dev.profile == "release";
@@ -57,25 +53,37 @@ pub fn run(args: DevArgs) -> u8 {
         .build()
     {
         Ok(rt) => rt,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(args.json, exit::ENV, e.to_string()),
     };
-    rt.block_on(async move {
+    let json = args.json;
+    let announced = Arc::new(AtomicBool::new(false));
+    let started = announced.clone();
+    let detail = Arc::new(Mutex::new(None::<String>));
+    let detail_slot = detail.clone();
+    let code = rt.block_on(async move {
         let listener = match tokio::net::TcpListener::bind(("127.0.0.1", port)).await {
             Ok(l) => l,
             Err(e) => {
-                crate::error(format!(
+                let msg = format!(
                     "cannot listen on 127.0.0.1:{port}: {e} (another `oxframe dev`? use --port)"
-                ));
+                );
+                if json {
+                    *detail_slot.lock().expect("lock") = Some(msg);
+                } else {
+                    crate::error(msg);
+                }
                 return exit::ENV;
             }
         };
         let port = listener.local_addr().map(|a| a.port()).unwrap_or(port);
         let hub = Arc::new(hub::Hub::default());
         let url = format!("http://127.0.0.1:{port}/?token={token}");
-        crate::note(format!("editor at {url}"));
+        if json {
+            println!("{}", serde_json::json!({"ok": true, "exit": 0, "url": url}));
+            started.store(true, Ordering::Relaxed);
+        } else {
+            crate::note(format!("editor at {url}"));
+        }
         if !args.no_open && (args.open || cfg.dev.open) {
             let _ = open::that_detached(&url);
         }
@@ -90,6 +98,7 @@ pub fn run(args: DevArgs) -> u8 {
             release,
             bin: cfg.bin,
             cpu: args.cpu,
+            json,
             hub,
         };
         tokio::select! {
@@ -102,11 +111,25 @@ pub fn run(args: DevArgs) -> u8 {
             }
             code = sup.run() => code,
             _ = tokio::signal::ctrl_c() => {
-                crate::note("bye");
+                if !json {
+                    crate::note("bye");
+                }
                 exit::OK
             }
         }
-    })
+    });
+    if announced.load(Ordering::Relaxed) {
+        crate::reply::Done::printed(code)
+    } else if json {
+        let error = detail
+            .lock()
+            .expect("lock")
+            .clone()
+            .unwrap_or_else(|| "dev server stopped".to_owned());
+        crate::reply::Done::with(code, serde_json::json!({ "error": error }))
+    } else {
+        crate::reply::Done::plain(code)
+    }
 }
 
 /// 128 random bits as hex.

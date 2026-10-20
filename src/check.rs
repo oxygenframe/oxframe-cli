@@ -5,37 +5,43 @@ use std::process::Command;
 
 use oxframe_protocol::{Meta, PROTOCOL_VERSION};
 
+use serde_json::{Value, json};
+
+use crate::reply::Done;
 use crate::{cargo, config, exit, render, ui};
 
-pub fn run(frames: bool) -> u8 {
+pub fn run(frames: bool, json: bool) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(json, exit::ENV, e),
     };
     let cfg = match config::Config::load(&root) {
         Ok(c) => c,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(json, exit::ENV, e),
     };
     let mut code = exit::OK;
+    let mut notes = Vec::new();
 
-    crate::note("cargo check");
-    match Command::new(cargo::cargo())
-        .current_dir(&root)
-        .arg("check")
-        .status()
-    {
-        Ok(s) if s.success() => {}
-        Ok(_) => return exit::BUILD,
-        Err(e) => {
-            crate::error(format!("cannot run cargo: {e}"));
-            return exit::ENV;
+    if !json {
+        crate::note("cargo check");
+    }
+    let checked = match cargo::check(&root, cfg.bin.as_deref(), json) {
+        Ok(b) => b,
+        Err(e) => return crate::reply::fail(json, exit::ENV, format!("cannot run cargo: {e}")),
+    };
+    if !checked.success {
+        if !json {
+            crate::hints::show(&checked.hints);
         }
+        return crate::reply::done(
+            json,
+            exit::BUILD,
+            json!({
+                "error": "cargo check failed",
+                "diagnostics": checked.messages,
+                "hints": checked.hints,
+            }),
+        );
     }
 
     let mut metas = Vec::new();
@@ -43,12 +49,21 @@ pub fn run(frames: bool) -> u8 {
     for path in &metas {
         let text = std::fs::read_to_string(path).unwrap_or_default();
         match Meta::parse(&text) {
-            Ok(_) => anstream::eprintln!(
-                "  ok  {}",
-                path.strip_prefix(&root).unwrap_or(path).display()
-            ),
+            Ok(_) => {
+                if !json {
+                    anstream::eprintln!(
+                        "  ok  {}",
+                        path.strip_prefix(&root).unwrap_or(path).display()
+                    );
+                }
+            }
             Err(e) => {
-                crate::error(format!("{}: {e}", path.display()));
+                let msg = format!("{}: {e}", path.display());
+                if json {
+                    notes.push(msg);
+                } else {
+                    crate::error(&msg);
+                }
                 code = exit::BUILD;
             }
         }
@@ -56,10 +71,30 @@ pub fn run(frames: bool) -> u8 {
 
     // Versions: CLI, the SDK the project links (asked from its binary) and
     // the embedded editor must speak the same protocol.
-    crate::note("checking protocol versions");
-    let build = match cargo::build(&root, false, cfg.bin.as_deref()) {
+    if !json {
+        crate::note("checking protocol versions");
+    }
+    let build = match if json {
+        cargo::build_quiet(&root, false, cfg.bin.as_deref())
+    } else {
+        cargo::build(&root, false, cfg.bin.as_deref())
+    } {
         Ok(b) if b.success => b,
-        _ => return exit::BUILD,
+        Ok(b) => {
+            if !json {
+                crate::hints::show(&b.hints);
+            }
+            return crate::reply::done(
+                json,
+                exit::BUILD,
+                json!({
+                    "error": "build failed",
+                    "diagnostics": b.messages,
+                    "hints": b.hints,
+                }),
+            );
+        }
+        Err(e) => return crate::reply::fail(json, exit::ENV, format!("cannot run cargo: {e}")),
     };
     let exe = build.executable.clone();
     let sdk = exe.as_ref().and_then(|exe| {
@@ -75,44 +110,61 @@ pub fn run(frames: bool) -> u8 {
         ))
     });
     let ui_v = ui::embedded_protocol_version();
-    anstream::eprintln!(
-        "  cli        protocol v{PROTOCOL_VERSION} (oxframe-cli {})",
-        env!("CARGO_PKG_VERSION")
-    );
-    match &sdk {
-        Some((p, v)) => anstream::eprintln!("  sdk        protocol v{p} (oxframe-sdk {v})"),
-        None => anstream::eprintln!("  sdk        unknown (project binary has no `info`)"),
-    }
-    match ui_v {
-        Some(p) => anstream::eprintln!(
-            "  editor-ui  protocol v{p} (editor-ui {})",
-            ui::embedded_version().unwrap_or_default()
-        ),
-        None => anstream::eprintln!("  editor-ui  debug client (no manifest)"),
+    if !json {
+        anstream::eprintln!(
+            "  cli        protocol v{PROTOCOL_VERSION} (oxframe-cli {})",
+            env!("CARGO_PKG_VERSION")
+        );
+        match &sdk {
+            Some((p, v)) => anstream::eprintln!("  sdk        protocol v{p} (oxframe-sdk {v})"),
+            None => anstream::eprintln!("  sdk        unknown (project binary has no `info`)"),
+        }
+        match ui_v {
+            Some(p) => anstream::eprintln!(
+                "  editor-ui  protocol v{p} (editor-ui {})",
+                ui::embedded_version().unwrap_or_default()
+            ),
+            None => anstream::eprintln!("  editor-ui  debug client (no manifest)"),
+        }
     }
     let mismatch = sdk.as_ref().is_some_and(|(p, _)| *p != PROTOCOL_VERSION)
         || ui_v.is_some_and(|p| p != PROTOCOL_VERSION);
     if mismatch {
-        crate::error(
-            "protocol versions differ: update oxframe-cli and the oxframe SDK to matching releases",
+        let error =
+            "protocol versions differ: update oxframe-cli and the oxframe SDK to matching releases";
+        if !json {
+            crate::error(error);
+            crate::hints::show(&crate::hints::from_text(error));
+        }
+        return crate::reply::done(
+            json,
+            exit::VERSION,
+            json!({
+                "error": error,
+                "hints": crate::hints::from_text(error),
+            }),
         );
-        return exit::VERSION;
     }
 
-    if render::find_ffmpeg(cfg.render.ffmpeg.as_deref()).is_none() {
+    if render::find_ffmpeg(cfg.render.ffmpeg.as_deref()).is_none() && !json {
         anstream::eprintln!(
             "\nwarning: ffmpeg not found — `oxframe render` will only produce PNG sequences.\n{}",
             render::FFMPEG_HELP
         );
     }
     if code != exit::OK {
-        return code;
+        return crate::reply::done(json, code, json!({ "error": notes.join("\n") }));
     }
     let Some(exe) = exe else {
-        crate::error("build produced no binary to visually check");
-        return exit::BUILD;
+        return crate::reply::fail(
+            json,
+            exit::BUILD,
+            "build produced no binary to visually check",
+        );
     };
-    crate::note("visual check");
+    if !json {
+        crate::note("visual check");
+    }
     let mut cmd = Command::new(exe);
     cmd.current_dir(&root).arg("check");
     let c = &cfg.check;
@@ -146,43 +198,69 @@ pub fn run(frames: bool) -> u8 {
         cmd.arg("--frames");
     }
     cmd.args(cfg.theme.args());
-    match cmd.status() {
-        Ok(s) if s.success() => exit::OK,
-        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+    let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, json) {
+        Ok(o) => o,
         Err(e) => {
-            crate::error(format!("cannot run the project binary: {e}"));
-            exit::ENV
+            return crate::reply::fail(
+                json,
+                exit::ENV,
+                format!("cannot run the project binary: {e}"),
+            );
         }
+    };
+    let hints = crate::hints::from_text(&stderr);
+    if !json {
+        crate::hints::show(&hints);
     }
+    let report = read_json(&root.join("out/check/report.json"));
+    let storyboard = root.join("out/check/storyboard.png");
+    crate::reply::done(
+        json,
+        status,
+        json!({
+            "storyboard": storyboard.display().to_string(),
+            "report": report,
+            "stdout": stdout,
+            "stderr": stderr,
+            "hints": hints,
+        }),
+    )
 }
 
 /// `oxframe inspect --at <seconds>`.
-pub fn inspect(at: f64, scene: Option<String>) -> u8 {
+pub fn inspect(at: f64, scene: Option<String>, json: bool) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(json, exit::ENV, e),
     };
     let cfg = match config::Config::load(&root) {
         Ok(c) => c,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(json, exit::ENV, e),
     };
-    let build = match cargo::build(&root, false, cfg.bin.as_deref()) {
+    let build = match if json {
+        cargo::build_quiet(&root, false, cfg.bin.as_deref())
+    } else {
+        cargo::build(&root, false, cfg.bin.as_deref())
+    } {
         Ok(b) if b.success => b,
-        Ok(_) => return exit::BUILD,
-        Err(e) => {
-            crate::error(format!("cannot run cargo: {e}"));
-            return exit::ENV;
+        Ok(b) => {
+            if !json {
+                crate::hints::show(&b.hints);
+            }
+            return crate::reply::done(
+                json,
+                exit::BUILD,
+                json!({
+                    "error": "build failed",
+                    "diagnostics": b.messages,
+                    "hints": b.hints,
+                }),
+            );
         }
+        Err(e) => return crate::reply::fail(json, exit::ENV, format!("cannot run cargo: {e}")),
     };
     let Some(exe) = build.executable else {
-        crate::error("build produced no binary");
-        return exit::BUILD;
+        return crate::reply::fail(json, exit::BUILD, "build produced no binary");
     };
     let mut cmd = Command::new(exe);
     cmd.current_dir(&root)
@@ -191,13 +269,33 @@ pub fn inspect(at: f64, scene: Option<String>) -> u8 {
         cmd.args(["--scene", scene]);
     }
     cmd.args(cfg.theme.args());
-    match cmd.status() {
-        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+    let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, json) {
+        Ok(o) => o,
         Err(e) => {
-            crate::error(format!("cannot run the project binary: {e}"));
-            exit::ENV
+            return crate::reply::fail(
+                json,
+                exit::ENV,
+                format!("cannot run the project binary: {e}"),
+            );
         }
+    };
+    let hints = crate::hints::from_text(&stderr);
+    if !json {
+        crate::hints::show(&hints);
     }
+    let inspect = serde_json::from_str::<Value>(&stdout).unwrap_or(Value::String(stdout));
+    crate::reply::done(
+        json,
+        status,
+        json!({ "inspect": inspect, "stderr": stderr, "hints": hints }),
+    )
+}
+
+fn read_json(path: &Path) -> Value {
+    std::fs::read_to_string(path)
+        .ok()
+        .and_then(|t| serde_json::from_str(&t).ok())
+        .unwrap_or(Value::Null)
 }
 
 fn collect_meta(dir: &Path, out: &mut Vec<std::path::PathBuf>) {

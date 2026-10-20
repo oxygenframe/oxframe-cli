@@ -26,6 +26,8 @@ pub struct Supervisor {
     pub release: bool,
     pub bin: Option<String>,
     pub cpu: bool,
+    /// Keep the project binary's stdout off the terminal, so `--json` stays one object.
+    pub json: bool,
     pub hub: Arc<Hub>,
 }
 
@@ -193,9 +195,14 @@ impl Supervisor {
             let _ = child.start_kill();
             return None;
         };
+        let json = self.json;
         tokio::spawn(async move {
             while let Ok(Some(line)) = lines.next_line().await {
-                anstream::println!("{line}");
+                if json {
+                    anstream::eprintln!("{line}");
+                } else {
+                    anstream::println!("{line}");
+                }
             }
         });
 

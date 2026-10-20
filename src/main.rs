@@ -9,8 +9,11 @@ mod cargo;
 mod check;
 mod config;
 mod dev;
+mod hints;
 mod init;
+mod mcp;
 mod render;
+mod reply;
 mod snapshot;
 mod ui;
 mod update_check;
@@ -36,6 +39,9 @@ struct Cli {
     /// More logging (same as RUST_LOG=debug).
     #[arg(long, short, global = true)]
     verbose: bool,
+    /// Print one JSON object on stdout instead of human text.
+    #[arg(long, global = true)]
+    json: bool,
     #[command(subcommand)]
     command: Cmd,
 }
@@ -133,6 +139,8 @@ enum Cmd {
         #[arg(long)]
         force: bool,
     },
+    /// MCP server on stdin/stdout (tools: check, storyboard, render_frame, inspect, list_components, docs_search, render).
+    Mcp,
 }
 
 fn main() -> ExitCode {
@@ -148,9 +156,14 @@ fn main() -> ExitCode {
         .with_writer(std::io::stderr)
         .init();
 
-    update_check::run();
-    let code = match cli.command {
-        Cmd::Init { name, sdk_path } => init::run(&name, sdk_path.as_deref()),
+    if !matches!(cli.command, Cmd::Mcp) {
+        update_check::run();
+    }
+    let done = match cli.command {
+        Cmd::Init { name, sdk_path } => {
+            let code = init::run(&name, sdk_path.as_deref());
+            reply::done(cli.json, code, serde_json::json!({"command": "init"}))
+        }
         Cmd::Dev {
             port,
             open,
@@ -165,6 +178,7 @@ fn main() -> ExitCode {
             release,
             ui_dir,
             cpu,
+            json: cli.json,
         }),
         Cmd::Render {
             out,
@@ -184,9 +198,10 @@ fn main() -> ExitCode {
             aspect,
             cpu,
             no_audio,
+            json: cli.json,
         }),
-        Cmd::Check { frames } => check::run(frames),
-        Cmd::Inspect { at, scene } => check::inspect(at, scene),
+        Cmd::Check { frames } => check::run(frames, cli.json),
+        Cmd::Inspect { at, scene } => check::inspect(at, scene, cli.json),
         Cmd::Snapshot {
             at,
             out,
@@ -199,11 +214,22 @@ fn main() -> ExitCode {
             scene,
             size,
             release,
+            json: cli.json,
         }),
-        Cmd::Agents { force } => agents::run(force),
-        Cmd::Upgrade => upgrade::run(),
+        Cmd::Agents { force } => {
+            let code = agents::run(force);
+            reply::done(cli.json, code, serde_json::json!({"command": "agents"}))
+        }
+        Cmd::Upgrade => {
+            let code = upgrade::run();
+            reply::done(cli.json, code, serde_json::json!({"command": "upgrade"}))
+        }
+        Cmd::Mcp => mcp::serve(),
     };
-    ExitCode::from(code)
+    if cli.json && !done.printed {
+        reply::emit(&done);
+    }
+    ExitCode::from(done.code)
 }
 
 /// Prints an error in red.

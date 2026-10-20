@@ -2,6 +2,9 @@
 
 use std::process::Command;
 
+use serde_json::json;
+
+use crate::reply::Done;
 use crate::{cargo, config, exit};
 
 pub struct RenderArgs {
@@ -14,22 +17,17 @@ pub struct RenderArgs {
     pub aspect: Option<String>,
     pub cpu: bool,
     pub no_audio: bool,
+    pub json: bool,
 }
 
-pub fn run(a: RenderArgs) -> u8 {
+pub fn run(a: RenderArgs) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
     let cfg = match config::Config::load(&root) {
         Ok(c) => c,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
     // Check ffmpeg before a potentially long build.
     let png = a.format.as_deref() == Some("png")
@@ -37,21 +35,43 @@ pub fn run(a: RenderArgs) -> u8 {
             .as_ref()
             .is_some_and(|o| o.extension().is_none() && a.format.is_none());
     if !png && find_ffmpeg(cfg.render.ffmpeg.as_deref()).is_none() {
-        crate::error(FFMPEG_HELP);
-        return exit::ENV;
+        let hints = crate::hints::from_text(FFMPEG_HELP);
+        if !a.json {
+            crate::error(FFMPEG_HELP);
+            crate::hints::show(&hints);
+        }
+        return crate::reply::done(
+            a.json,
+            exit::ENV,
+            json!({ "error": FFMPEG_HELP, "hints": hints }),
+        );
     }
 
-    crate::note("building (release)…");
-    let build = match cargo::build(&root, true, cfg.bin.as_deref()) {
+    if !a.json {
+        crate::note("building (release)…");
+    }
+    let build = match if a.json {
+        cargo::build_quiet(&root, true, cfg.bin.as_deref())
+    } else {
+        cargo::build(&root, true, cfg.bin.as_deref())
+    } {
         Ok(b) => b,
-        Err(e) => {
-            crate::error(format!("cannot run cargo: {e}"));
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, format!("cannot run cargo: {e}")),
     };
     let (true, Some(exe)) = (build.success, build.executable) else {
-        crate::error("build failed");
-        return exit::BUILD;
+        if !a.json {
+            crate::hints::show(&build.hints);
+            crate::error("build failed");
+        }
+        return crate::reply::done(
+            a.json,
+            exit::BUILD,
+            json!({
+                "error": "build failed",
+                "diagnostics": build.messages,
+                "hints": build.hints,
+            }),
+        );
     };
 
     let mut cmd = Command::new(exe);
@@ -80,13 +100,25 @@ pub fn run(a: RenderArgs) -> u8 {
         cmd.arg("--no-audio");
     }
     cmd.args(cfg.theme.args());
-    match cmd.status() {
-        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+    let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, a.json) {
+        Ok(o) => o,
         Err(e) => {
-            crate::error(format!("cannot run the project binary: {e}"));
-            exit::ENV
+            return crate::reply::fail(
+                a.json,
+                exit::ENV,
+                format!("cannot run the project binary: {e}"),
+            );
         }
+    };
+    let hints = crate::hints::from_text(&stderr);
+    if !a.json {
+        crate::hints::show(&hints);
     }
+    crate::reply::done(
+        a.json,
+        status,
+        json!({ "stdout": stdout, "stderr": stderr, "hints": hints }),
+    )
 }
 
 pub const FFMPEG_HELP: &str = "\

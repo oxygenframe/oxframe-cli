@@ -4,6 +4,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+use serde_json::json;
+
+use crate::reply::Done;
 use crate::{cargo, config, exit};
 
 pub struct SnapshotArgs {
@@ -12,33 +15,40 @@ pub struct SnapshotArgs {
     pub scene: Option<String>,
     pub size: Option<String>,
     pub release: bool,
+    pub json: bool,
 }
 
-pub fn run(a: SnapshotArgs) -> u8 {
+pub fn run(a: SnapshotArgs) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
     let cfg = match config::Config::load(&root) {
         Ok(c) => c,
-        Err(e) => {
-            crate::error(e);
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
-    let build = match cargo::build(&root, a.release, cfg.bin.as_deref()) {
+    let build = match if a.json {
+        cargo::build_quiet(&root, a.release, cfg.bin.as_deref())
+    } else {
+        cargo::build(&root, a.release, cfg.bin.as_deref())
+    } {
         Ok(b) => b,
-        Err(e) => {
-            crate::error(format!("cannot run cargo: {e}"));
-            return exit::ENV;
-        }
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, format!("cannot run cargo: {e}")),
     };
     let (true, Some(exe)) = (build.success, build.executable) else {
-        crate::error("build failed");
-        return exit::BUILD;
+        if !a.json {
+            crate::hints::show(&build.hints);
+            crate::error("build failed");
+        }
+        return crate::reply::done(
+            a.json,
+            exit::BUILD,
+            json!({
+                "error": "build failed",
+                "diagnostics": build.messages,
+                "hints": build.hints,
+            }),
+        );
     };
     let mut cmd = Command::new(exe);
     // CPU rendering: identical output everywhere, no GPU needed.
@@ -54,11 +64,23 @@ pub fn run(a: SnapshotArgs) -> u8 {
     }
     cmd.args(["--size", a.size.as_deref().unwrap_or("960x540")]);
     cmd.args(cfg.theme.args());
-    match cmd.status() {
-        Ok(s) => s.code().map_or(exit::BUILD, |c| c.clamp(0, 255) as u8),
+    let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, a.json) {
+        Ok(o) => o,
         Err(e) => {
-            crate::error(format!("cannot run the project binary: {e}"));
-            exit::ENV
+            return crate::reply::fail(
+                a.json,
+                exit::ENV,
+                format!("cannot run the project binary: {e}"),
+            );
         }
+    };
+    let hints = crate::hints::from_text(&stderr);
+    if !a.json {
+        crate::hints::show(&hints);
     }
+    crate::reply::done(
+        a.json,
+        status,
+        json!({ "stdout": stdout, "stderr": stderr, "hints": hints }),
+    )
 }

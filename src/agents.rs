@@ -5,10 +5,10 @@ use std::path::Path;
 
 use crate::exit;
 
-const AGENTS_MD: &str = include_str!("../templates/agents/AGENTS.md");
+pub(crate) const AGENTS_MD: &str = include_str!("../templates/agents/AGENTS.md");
 const CLAUDE_MD: &str = include_str!("../templates/agents/CLAUDE.md");
-const SKILL_MD: &str = include_str!("../templates/agents/SKILL.md");
-const REFERENCE_MD: &str = include_str!("../templates/agents/reference.md");
+pub(crate) const SKILL_MD: &str = include_str!("../templates/agents/SKILL.md");
+pub(crate) const REFERENCE_MD: &str = include_str!("../templates/agents/reference.md");
 
 /// Version marker inside the generated files.
 const MARKER: &str = "oxframe-agents ";
@@ -140,6 +140,8 @@ mod tests {
         let agents = std::fs::read_to_string(tmp.path().join("AGENTS.md")).unwrap();
         assert!(agents.contains("oxframe 0.3.2"));
         assert!(agents.contains("https://oxframe.dev/docs/0.3\n"));
+        assert!(agents.contains("https://oxframe.dev/docs/0.3/llms.txt"));
+        assert!(agents.contains("https://oxframe.dev/docs/0.3/llms-full.txt"));
         assert!(agents.contains("https://docs.rs/oxframe/0.3.2/oxframe/"));
         assert!(!agents.contains("{{"));
     }
