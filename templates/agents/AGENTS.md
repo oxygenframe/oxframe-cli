@@ -37,6 +37,19 @@ agent session (it never exits).
 4. Properties are `Signal<T>`: `.get()`, `.set(v)`, `.to(v, secs).ease(e)`, `.bind(move || ..)`.
 5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees. Prefer theme tokens (`Accent`, `.display()`, `.padding(Md)`, `Normal`) over hardcoded colors and sizes. Place with `.next_to(other, Side::Bottom)`, `.align_to(other, Edge::Top)`, `.to_edge(Edge::Top)`, `.center_in(other)` and `.width(pct(80))` instead of pixel guesses. `Project::aspects([Landscape, Portrait, Square])` and `view.is_portrait()` cover 16:9, 9:16 and 1:1. `Project::theme(...)` or `[theme]` in `oxframe.toml` restyles the whole video.
 
+## Components
+
+Prefer these over drawing the block yourself. Each has `enter()`, `next()` and `exit()`.
+
+- `TitleCard::new("Binary search").subtitle("O(log n)")` — title, then the subtitle on `next`.
+- `ChapterMarker::new("1  Search")` — label on the top safe edge.
+- `BulletList::new(["Take the middle", "Compare", "Drop half"])` — `next` reveals one row.
+- `CodeExplainer::new("lo + (hi - lo) / 2").step(1, 1, "the middle")` — `next` focuses that line range.
+- `FlowDiagram::new().edge("Client", "API").edge("API", "DB")` — laid out in layers; `.down()` stacks them. `next` highlights the next node.
+- `Callout::new(node).text("the middle")` — arrow and caption above `node`.
+- `LowerThird::new("Ada").role("walks the half")` — name plate on the bottom safe edge.
+- `EndCard::new("That's the search").note("Repeat from the top")` — closing card.
+
 See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 ## Rules

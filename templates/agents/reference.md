@@ -45,6 +45,10 @@ z_index anchor((ax, ay))`, and inside a `Layout`: `grow shrink basis margin alig
 Builders take values; handles return `Signal`s of the same names. Children: `.child(builder)` on a
 builder, or `handle.add(builder)` for a handle. `node.remove()`, `node.reparent(other)`.
 
+## Components
+
+`view.add(TitleCard::new("Binary search").subtitle("O(log n)"))`, `ChapterMarker::new("1  Search")`, `BulletList::new(["Take the middle", "Compare"])`, `CodeExplainer::new(src).step(1, 1, "the middle")`, `FlowDiagram::new().edge("Client", "API").down()`, `Callout::new(node).text("here")`, `LowerThird::new("Ada").role("walks the half")`, `EndCard::new("Done").note("thanks")`. All of them: `enter().await`, `next().await`, `exit().await`. They read the theme and the safe area.
+
 ## Position
 
 `node.next_to(other, Side::Right)` (also `Left`, `Top`, `Bottom`) sits outside the neighbor with the theme's `Md` gap, and follows it every frame. `align_to(other, Edge::Top)`, `to_edge(Edge::Bottom)` (pins to the safe area, not the frame edge), `center_in(other)`. The same methods exist on builders: `.h1().to_edge(Edge::Top)`. `.width(pct(80))` / `.height(pct(50))` is a fraction of the frame, or of the parent when the parent has a fixed size. `view.safe_area()` is the scene-space rectangle; `view.is_portrait()` is true when the frame is taller than wide. `Project::aspects([Aspect::Landscape, Aspect::Portrait, Aspect::Square])` — `oxframe check` lints each one, `oxframe render --aspect 9:16` or `--aspect all` exports them.

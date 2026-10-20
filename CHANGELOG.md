@@ -4,6 +4,15 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.2.5 — 2026-10-20
+
+### Added
+
+- Agent files list the explainer components (`TitleCard`, `BulletList`,
+  `CodeExplainer`, `FlowDiagram`, `Callout`, `LowerThird`, `EndCard`,
+  `ChapterMarker`) with a one-line example each.
+- Creates projects on oxframe 0.2.5 (`oxframe upgrade` moves existing ones).
+
 ## 0.2.4 — 2026-10-20
 
 ### Added
