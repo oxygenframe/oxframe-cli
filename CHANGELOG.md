@@ -4,6 +4,17 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.2.4 — 2026-10-20
+
+### Added
+
+- `oxframe render --aspect 16:9|9:16|1:1|all`. `all` writes one file per format
+  the project declares with `Project::aspects`.
+- `oxframe check` lints each of those formats. Extra storyboards are
+  `storyboard-9x16.png` and `storyboard-1x1.png`.
+- Creates projects on oxframe 0.2.4 (`oxframe upgrade` moves existing ones).
+- Agent files describe `next_to`, `to_edge`, `pct` and aspects.
+
 ## 0.2.3 — 2026-10-20
 
 ### Added

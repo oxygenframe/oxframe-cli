@@ -10,6 +10,8 @@ pub struct RenderArgs {
     pub range: Option<String>,
     pub format: Option<String>,
     pub size: Option<String>,
+    /// `16:9`, `9:16`, `1:1`, or `all`.
+    pub aspect: Option<String>,
     pub cpu: bool,
     pub no_audio: bool,
 }
@@ -62,6 +64,7 @@ pub fn run(a: RenderArgs) -> u8 {
         ("--range", &a.range),
         ("--format", &a.format),
         ("--size", &a.size),
+        ("--aspect", &a.aspect),
     ] {
         if let Some(v) = v {
             cmd.args([flag, v]);

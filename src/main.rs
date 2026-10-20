@@ -83,6 +83,9 @@ enum Cmd {
         format: Option<String>,
         #[arg(long)]
         size: Option<String>,
+        /// 16:9, 9:16, 1:1, or all. `all` renders every format the project declares.
+        #[arg(long)]
+        aspect: Option<String>,
         /// Render on the CPU (tiny-skia), e.g. in CI without a GPU.
         #[arg(long)]
         cpu: bool,
@@ -169,6 +172,7 @@ fn main() -> ExitCode {
             range,
             format,
             size,
+            aspect,
             cpu,
             no_audio,
         } => render::run(render::RenderArgs {
@@ -177,6 +181,7 @@ fn main() -> ExitCode {
             range,
             format,
             size,
+            aspect,
             cpu,
             no_audio,
         }),
