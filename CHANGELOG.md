@@ -4,7 +4,9 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.2.0 — 2026-10-20
+
+- Creates projects on oxframe 0.2.0 (`oxframe upgrade` moves existing ones).
 
 - `AGENTS.md` and the Claude Code skill link the docs and the docs.rs API
   reference of the exact oxframe version the project is pinned to.
