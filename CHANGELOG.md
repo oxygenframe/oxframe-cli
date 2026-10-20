@@ -6,6 +6,9 @@ same version (see the SDK's
 
 ## 0.2.6 — 2026-10-20
 
+The first published release after 0.2.1: it also contains everything listed
+under 0.2.2–0.2.5 below, which were not published separately.
+
 ### Added
 
 - `oxframe mcp`, an MCP server on stdin and stdout. Tools: `check`,
