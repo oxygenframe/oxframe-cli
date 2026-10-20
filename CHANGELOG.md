@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.5.0 — 2026-10-20
+
+- Creates projects on oxframe 0.5.0.
+- The agent cheat sheet describes code diffs: `code().to(next, secs)` slides
+  tokens, and `insert`, `remove`, `replace` and `.flash()` edit one spot.
+
 ## 0.4.0 — 2026-10-20
 
 - Creates projects on oxframe 0.4.0.

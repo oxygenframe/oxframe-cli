@@ -28,7 +28,7 @@ fn main() {
 | `Path` | `.data(BezPath) .svg("M0 0 L10 0 Z")` | `data` (morphs between any paths) |
 | `Line` | `.points([(x, y), ..]) .smooth .closed .start_arrow .end_arrow .arrow_size` | `points arrow_size` |
 | `Txt` | `.text .rich([span("a").bold().italic().color(c)]) .font_size .weight .family(SANS/MONO) .align .max_width` | `text spans font_size weight`; `.morph_to("new", secs)` |
-| `Code` | `.code(src) .language("rust"/"js"/"python"/"json"/"toml"/"shell") .theme(CodeTheme::dark()) .focus(first, last) .dim(0.3)` | `code font_size focus dim`; `.focus_lines(a, b, secs)` |
+| `Code` | `.code(src) .language("rust"/"js"/"python"/"json"/"toml"/"shell") .theme(CodeTheme::dark()) .focus(first, last) .dim(0.3)` | `font_size focus dim`; `.code().to(next, secs)` diffs tokens (not a typewriter); `.insert(line, col, text, secs)`, `.remove(((l, c), (l, c)), secs)`, `.replace(range, text, secs)`, `.flash()` on that tween; `.focus_lines(a, b, secs)` — lines are 1-based, columns 0-based |
 | `Img` | `.src(include_bytes!("../assets/a.png")) .file("assets/a.png") .width .height` (PNG/JPEG/SVG) | `width height` |
 | `Layout` | `.row() .column() .wrap(bool) .grid(cols) .gap .padding .align(LayoutAlign::..) .justify(Justify::..) .width .height .radius` | `gap padding width height radius` |
 | `Grid` | `.width .height .spacing` | `width height spacing` |
