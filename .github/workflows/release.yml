@@ -21,8 +21,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with: { toolchain: "1.97.1", targets: "${{ matrix.target }}" }
-      - run: ./scripts/fetch-ui.sh
-        shell: bash
+      # ui/dist is committed; the unit test checks it matches ui.lock.
+      - run: cargo test --locked --bins ui::
       - run: cargo build --release --locked --target ${{ matrix.target }}
       - name: Sign and notarize (macOS)
         if: runner.os == 'macOS'
@@ -70,12 +70,21 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { merge-multiple: true, path: dist }
       - run: cp install.sh dist/
-      - run: gh release create "${{ github.ref_name }}" dist/* --generate-notes
+      - run: gh release create "${{ github.ref_name }}" dist/* --notes-file <(awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## " v "( |$)" {on=1; next} /^## / {on=0} on' CHANGELOG.md)
         env: { GH_TOKEN: "${{ github.token }}" }
       - uses: dtolnay/rust-toolchain@master
         with: { toolchain: "1.97.1" }
-      - run: ./scripts/fetch-ui.sh
+      - name: Already on crates.io?
+        id: published
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          if curl -sf -A "oxframe-cli release (https://oxframe.dev)" \
+            "https://crates.io/api/v1/crates/oxframe-cli/$v" > /dev/null; then
+            echo "yes=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: rust-lang/crates-io-auth-action@v1
+        if: steps.published.outputs.yes != 'true'
         id: auth
       - run: cargo publish --locked
+        if: steps.published.outputs.yes != 'true'
         env: { CARGO_REGISTRY_TOKEN: "${{ steps.auth.outputs.token }}" }
