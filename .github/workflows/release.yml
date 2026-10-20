@@ -19,6 +19,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+      # Cargo.toml points at ../oxframe-sdk: the SDK release with the same
+      # tag (CLI and SDK share versions). checkout cannot write outside.
+      - uses: actions/checkout@v7
+        with: { repository: oxygenframe/oxframe-sdk, ref: "${{ github.ref_name }}", path: oxframe-sdk }
+      - run: mv oxframe-sdk ../oxframe-sdk
+        shell: bash
       - uses: dtolnay/rust-toolchain@master
         with: { toolchain: "1.97.1", targets: "${{ matrix.target }}" }
       # ui/dist is committed; the unit test checks it matches ui.lock.
@@ -67,6 +73,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Cargo.toml points at ../oxframe-sdk: the SDK release with the same
+      # tag (CLI and SDK share versions). checkout cannot write outside.
+      - uses: actions/checkout@v7
+        with: { repository: oxygenframe/oxframe-sdk, ref: "${{ github.ref_name }}", path: oxframe-sdk }
+      - run: mv oxframe-sdk ../oxframe-sdk
+        shell: bash
       - uses: actions/download-artifact@v8
         with: { merge-multiple: true, path: dist }
       - run: cp install.sh dist/
