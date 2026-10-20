@@ -60,13 +60,26 @@ s.x().to(300.0, 1.0).await;                                  // seconds
 s.x().to(300.0, 1.0).ease(presets::OUT_BACK).await;           // presets::*, oxframe::bounce_out, oxframe::elastic_out, |t| t * t
 s.fill().to(color!("#68abdf"), 0.5).await;                   // colors blend in OKLab
 s.scale().to(Vec2::new(2.0, 2.0), 0.5).await;
-all((a.x().to(1.0, 1.0), b.y().to(2.0, 0.5))).await;          // together (≤ 12)
-all_vec(vec_of_boxed).await;                                  // together, dynamic count
-sequence(0.1, vec_of_boxed).await;                            // staggered starts
+all((a.x().to(1.0, 1.0), b.y().to(2.0, 0.5))).await;          // together (tuple ≤ 12)
+all(cards.iter().map(|c| c.fade_in())).await;                 // together, any count
+stagger(0.1, &cards, |c| c.pop_in()).await;                   // staggered starts
+stagger(0.1, &cards, |c| async move { c.pop_in().await; c.fade_out().await; }).await;
+let first = any((a.x().to(1.0, 2.0), wait_for(0.5))).await;   // first to finish (index)
+repeat(3, || dot.scale().to(Vec2::new(1.2, 1.2), 0.3)).await;
+spawn(loop_while(|| true, move || dot.rotation().to(dot.rotation().get() + 360.0, 2.0)));  // background loop
 wait_for(0.5).await;  next_frame().await;
 let h = spawn(async move { /* … */ }); h.await;              // background task
 ```
-`vec_of_boxed: Vec<oxframe::BoxFuture>` — `Box::pin(anim)` each element.
+
+Helpers on every node, timed by the theme (`Fast`/`Normal`/`Slow`), with
+`.duration(s)` to override:
+
+```rust
+title.fade_in().await;  title.fade_out().duration(0.3).await;
+badge.pop_in().await;                     // scale from 0 with overshoot
+card.slide_in(Side::Left).await;          // slides in from the left, fading in
+path.draw_on().await;                     // outline drawn start → end
+```
 
 ## Signals
 

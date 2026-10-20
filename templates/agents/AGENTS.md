@@ -39,7 +39,7 @@ agent session (it never exits).
 
 1. `let s = view.add(Rect::new().size(200.0).x(-300.0).fill(color!("#e13238")));` — builder sets the start; `add` returns a `Copy` handle.
 2. `s.x().to(300.0, 1.0).await;` — animate a property (target, seconds) and wait.
-3. `all((a, b, c)).await` — run together (tuples up to 12); `sequence(delay, vec_of_boxed)`; `wait_for(secs)`; `spawn(fut)` for background.
+3. `all((a, b, c)).await` — run together (a tuple, or `all(items.iter().map(|x| x.fade_in()))`); `stagger(0.1, &items, |x| x.pop_in()).await` — one after another; `wait_for(secs)`; `spawn(fut)` for background. Never `Box::pin` or `BoxFuture`.
 4. Properties are `Signal<T>`: `.get()`, `.set(v)`, `.to(v, secs).ease(e)`, `.bind(move || ..)`.
 5. Coordinates: origin at the center, y down, default canvas 1920×1080 at 60 fps; rotation in degrees. Prefer theme tokens (`Accent`, `.display()`, `.padding(Md)`, `Normal`) over hardcoded colors and sizes. Place with `.next_to(other, Side::Bottom)`, `.align_to(other, Edge::Top)`, `.to_edge(Edge::Top)`, `.center_in(other)` and `.width(pct(80))` instead of pixel guesses. `Project::aspects([Landscape, Portrait, Square])` and `view.is_portrait()` cover 16:9, 9:16 and 1:1. `Project::theme(...)` or `[theme]` in `oxframe.toml` restyles the whole video.
 
@@ -63,7 +63,7 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 - **Deterministic**: never use `std::time`, `Instant`, `rand::thread_rng` or other entropy; use `random()` / `random_range(a, b)` (seeded by `Project::seed`). Avoid iterating `HashMap` to decide what to draw; use `Vec`/`BTreeMap`.
 - Names for `wait_until`, `tune!`, `ease!` are `[a-z0-9_-]+` (checked at compile time for the macros).
 - Colors: `color!("#rrggbb")` (compile-time checked) or `Color::rgb(r, g, b)` with 0..1 floats.
-- Keep each scene a straight story: prefer `all(..)`/`sequence(..)` over manual frame loops; `next_frame()` only for per-frame logic.
+- Keep each scene a straight story: prefer `all(..)`/`stagger(..)` and the helpers `fade_in()`, `fade_out()`, `pop_in()`, `slide_in(Side::Left)`, `draw_on()` (timed by the theme; `.duration(s)` to change) over manual tweens and frame loops; `next_frame()` only for per-frame logic.
 - After each visual change run `oxframe check`, open `out/check/storyboard.png` and read `report.json`, fix what it reports, and run it again. Do not report success while it exits non-zero.
 - Name nodes that matter in the story: `.name("title")`. Without a name, check and inspect label the node by the `add` call site (`src/main.rs:42`).
 
@@ -71,8 +71,7 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 - *"closure may outlive the current function"* in `bind`: clone the signals first and use `move`:
   `let (ax, bx) = (a.x(), b.x()); label.x().bind(move || (ax.get() + bx.get()) / 2.0);`
-- *mismatched types* when collecting animations into a `Vec`: box them:
-  `.map(|r| -> oxframe::BoxFuture { Box::pin(r.x().to(0.0, 1.0)) })`.
+- *"`()` is not an animation"*: a closure ending in `;` returns nothing. Drop the `;` (`|r| r.fade_in()`), or return `async move { a.await; b.await; }` for several steps.
 - `Signal::new(0.0)` ambiguous float: write `0.0f64`.
 - `Txt::text().to(..)` takes a `String`: `"new text".into()`.
-- `all` takes a **tuple** — note the double parentheses: `all((a, b))`.
+- `all` of a few different animations takes a **tuple** — note the double parentheses: `all((a, b))`.

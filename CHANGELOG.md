@@ -4,6 +4,13 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.3.0 — 2026-10-20
+
+- Creates projects on oxframe 0.3.0 (`oxframe upgrade` moves existing ones).
+- The agent files teach the new style: `stagger`, `all` over collections,
+  `any`, `repeat`, the node helpers (`fade_in`, `pop_in`, `slide_in`,
+  `draw_on`) and the `;`-in-a-closure fix. No `Box::pin` or `BoxFuture`.
+
 ## 0.2.6 — 2026-10-20
 
 The first published release after 0.2.1: it also contains everything listed
