@@ -30,6 +30,7 @@ fn main() {
 | `Txt` | `.text .rich([span("a").bold().italic().color(c)]) .font_size .weight .family(SANS/MONO) .align .max_width` | `text spans font_size weight`; `.morph_to("new", secs)` |
 | `Code` | `.code(src) .language("rust"/"js"/"python"/"json"/"toml"/"shell") .theme(CodeTheme::dark()) .focus(first, last) .dim(0.3)` | `font_size focus dim`; `.code().to(next, secs)` diffs tokens (not a typewriter); `.insert(line, col, text, secs)`, `.remove(((l, c), (l, c)), secs)`, `.replace(range, text, secs)`, `.flash()` on that tween; `.focus_lines(a, b, secs)` — lines are 1-based, columns 0-based |
 | `Img` | `.src(include_bytes!("../assets/a.png")) .file("assets/a.png") .width .height` (PNG/JPEG/SVG) | `width height` |
+| `Svg` | `.src(include_bytes!("../assets/logo.svg")) .file("assets/logo.svg") .width .height` (aspect kept if only one is set) | `width height`; `.find("id")` the element with that id; `.paths()` every contour in paint order. Filters, masks and clip paths are skipped with a warning |
 | `Layout` | `.row() .column() .wrap(bool) .grid(cols) .gap .padding .align(LayoutAlign::..) .justify(Justify::..) .width .height .radius` | `gap padding width height radius` |
 | `Grid` | `.width .height .spacing` | `width height spacing` |
 | `Group` | — | — |

@@ -9,6 +9,8 @@ same version (see the SDK's
 - Creates projects on oxframe 0.5.0.
 - The agent cheat sheet describes code diffs: `code().to(next, secs)` slides
   tokens, and `insert`, `remove`, `replace` and `.flash()` edit one spot.
+- The cheat sheet describes `Svg`: a file becomes groups, paths and images,
+  `find("id")` picks one element, `paths()` lists the contours.
 
 ## 0.4.0 — 2026-10-20
 
