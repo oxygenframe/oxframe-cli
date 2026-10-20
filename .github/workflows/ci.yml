@@ -16,10 +16,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Cargo.toml points at ../oxframe-sdk; checkout cannot write outside
       # the workspace, so clone inside and move it next to this repo.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
       - run: mv oxframe-sdk ../oxframe-sdk
         shell: bash
@@ -35,10 +35,10 @@ jobs:
     # oxframe init → oxframe dev until Ready → hot reload → oxframe render --cpu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Cargo.toml points at ../oxframe-sdk; checkout cannot write outside
       # the workspace, so clone inside and move it next to this repo.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
       - run: mv oxframe-sdk ../oxframe-sdk
         shell: bash
@@ -54,9 +54,9 @@ jobs:
   deny:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # cargo metadata needs the path dependency on ../oxframe-sdk.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: oxygenframe/oxframe-sdk, path: oxframe-sdk }
       - run: mv oxframe-sdk ../oxframe-sdk
       - uses: EmbarkStudios/cargo-deny-action@v2

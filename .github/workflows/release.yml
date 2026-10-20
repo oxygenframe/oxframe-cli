@@ -18,11 +18,11 @@ jobs:
           - { target: x86_64-pc-windows-msvc, os: windows-latest }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
         with: { toolchain: "1.97.1", targets: "${{ matrix.target }}" }
       # ui/dist is committed; the unit test checks it matches ui.lock.
-      - run: cargo test --locked --bins ui::
+      - run: "cargo test --locked --bins ui::"
       - run: cargo build --release --locked --target ${{ matrix.target }}
       - name: Sign and notarize (macOS)
         if: runner.os == 'macOS'
@@ -59,15 +59,15 @@ jobs:
       - name: Sign with cosign (keyless)
         shell: bash
         run: for f in oxframe-*.tar.gz oxframe-*.zip; do [ -e "$f" ] && cosign sign-blob --yes "$f" --bundle "$f.cosign.bundle"; done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with: { name: "${{ matrix.target }}", path: "oxframe-*" }
 
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with: { merge-multiple: true, path: dist }
       - run: cp install.sh dist/
       - run: gh release create "${{ github.ref_name }}" dist/* --notes-file <(awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## " v "( |$)" {on=1; next} /^## / {on=0} on' CHANGELOG.md)
