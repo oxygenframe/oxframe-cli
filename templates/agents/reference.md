@@ -288,6 +288,8 @@ x.to(1.0, 1.0).ease(ease!("slide"));     // curve editor; ease!("slide", presets
 
 ## Rendering
 
+- `oxframe render` runs 2-second segments in parallel (`--jobs n`, default cores ≤ 8); output bytes do not depend on n.
+
 `oxframe check [--frames]` — storyboard and `report.json` in `out/check/`. `--frames` also writes full-size PNGs. Thresholds live in `oxframe.toml` `[check]`. Errors exit 1.
 `oxframe inspect --at <seconds> [--scene s] [--graph]` — JSON scene tree at that time. `--graph` adds the render passes.
 `oxframe render [--out out.mp4|.webm|.mov|dir] [--format mp4|webm|prores|png] [--scene s] [--range 1..3] [--size 1280x720] [--cpu]`

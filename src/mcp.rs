@@ -217,6 +217,7 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             no_audio: false,
             subtitles: None,
             slides: None,
+            jobs: None,
             json: true,
         })),
         _ => (format!("unknown tool: {name}"), true),

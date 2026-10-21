@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.0 — 2026-10-21
+
+- `oxframe render --jobs 4` passes the number of parallel segments to the
+  project; by default the project uses one per core, at most eight.
+- Creates projects on oxframe 0.20.0.
+
 ## 0.19.0 — 2026-10-21
 
 - Creates projects on oxframe 0.19.0.

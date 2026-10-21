@@ -126,6 +126,10 @@ enum Cmd {
         /// stop (`slide_break` and scene ends). No ffmpeg needed.
         #[arg(long)]
         slides: Option<PathBuf>,
+        /// Render 2-second segments in this many processes at once (default:
+        /// cores, at most 8). The file is the same for any number.
+        #[arg(long)]
+        jobs: Option<u32>,
     },
     /// Type-check, then write a storyboard and a visual-lint report to out/check/.
     Check {
@@ -244,6 +248,7 @@ fn main() -> ExitCode {
             no_audio,
             subtitles,
             slides,
+            jobs,
         } => render::run(render::RenderArgs {
             out,
             scene,
@@ -255,6 +260,7 @@ fn main() -> ExitCode {
             no_audio,
             subtitles,
             slides,
+            jobs,
             json: cli.json,
         }),
         Cmd::Check { frames } => check::run(frames, cli.json),
