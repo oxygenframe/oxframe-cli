@@ -39,6 +39,16 @@ verify visual changes with `oxframe check` (storyboard and `report.json`) and ne
 `oxframe agents` refreshes them after an upgrade; files without the
 `oxframe-agents` marker (edited by you) are kept unless `--force`.
 
+`oxframe mcp` is an MCP server over stdio with `check`, `inspect`,
+`render_graph`, `render_frame`, `render`, `list_components` and
+`docs_search`:
+
+```json
+{ "mcpServers": { "oxframe": { "command": "oxframe", "args": ["mcp"] } } }
+```
+
+- MCP Registry name: `mcp-name: io.github.oxygenframe/oxframe`
+
 ## How `oxframe dev` works
 
 ```

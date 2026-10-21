@@ -360,6 +360,20 @@ fn read_message(reader: &mut impl BufRead) -> Option<Value> {
 
 #[cfg(test)]
 mod tests {
+    /// The MCP Registry entry (server.json) names this crate and version,
+    /// and the README carries the name the registry checks on crates.io.
+    #[test]
+    fn registry_entry_matches_the_crate() {
+        let server: serde_json::Value =
+            serde_json::from_str(include_str!("../server.json")).expect("server.json is JSON");
+        let version = env!("CARGO_PKG_VERSION");
+        assert_eq!(server["version"], version);
+        assert_eq!(server["packages"][0]["identifier"], env!("CARGO_PKG_NAME"));
+        assert_eq!(server["packages"][0]["version"], version);
+        let name = server["name"].as_str().unwrap();
+        assert!(include_str!("../README.md").contains(&format!("mcp-name: {name}")));
+    }
+
     use super::*;
 
     #[test]
