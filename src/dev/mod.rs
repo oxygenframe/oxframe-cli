@@ -28,6 +28,8 @@ pub struct DevArgs {
     pub release: bool,
     pub ui_dir: Option<PathBuf>,
     pub cpu: bool,
+    /// `oxframe present`: open the presentation instead of the editor.
+    pub present: bool,
     pub json: bool,
 }
 
@@ -77,10 +79,23 @@ pub fn run(args: DevArgs) -> crate::reply::Done {
         };
         let port = listener.local_addr().map(|a| a.port()).unwrap_or(port);
         let hub = Arc::new(hub::Hub::default());
-        let url = format!("http://127.0.0.1:{port}/?token={token}");
+        let mut url = format!("http://127.0.0.1:{port}/?token={token}");
+        let notes = format!("http://127.0.0.1:{port}/?present=notes");
+        if args.present {
+            url.push_str("&present");
+        }
         if json {
-            println!("{}", serde_json::json!({"ok": true, "exit": 0, "url": url}));
+            let mut reply = serde_json::json!({"ok": true, "exit": 0, "url": url});
+            if args.present {
+                reply["notes"] = serde_json::json!(notes);
+            }
+            println!("{reply}");
             started.store(true, Ordering::Relaxed);
+        } else if args.present {
+            crate::note(format!("presentation at {url}"));
+            crate::note(format!(
+                "speaker notes at {notes} (or press N); F for full screen"
+            ));
         } else {
             crate::note(format!("editor at {url}"));
         }

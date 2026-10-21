@@ -58,6 +58,25 @@ enum Cmd {
         #[arg(long, env = "OXFRAME_SDK_PATH")]
         sdk_path: Option<PathBuf>,
     },
+    /// Show the project as a presentation: full screen, stopping at every
+    /// `slide_break` and scene end. Arrows, space, page keys and slide
+    /// clickers move between stops; N opens the speaker notes.
+    Present {
+        #[arg(long)]
+        port: Option<u16>,
+        /// Do not open the browser.
+        #[arg(long)]
+        no_open: bool,
+        /// Build with --release.
+        #[arg(long)]
+        release: bool,
+        /// Serve the editor from a directory instead of the embedded one.
+        #[arg(long)]
+        ui_dir: Option<PathBuf>,
+        /// Render on the CPU.
+        #[arg(long)]
+        cpu: bool,
+    },
     /// Watch, rebuild and preview in the browser editor.
     Dev {
         #[arg(long)]
@@ -100,6 +119,13 @@ enum Cmd {
         cpu: bool,
         #[arg(long)]
         no_audio: bool,
+        /// Also write the spoken lines as .srt or .vtt (by extension).
+        #[arg(long)]
+        subtitles: Option<PathBuf>,
+        /// Instead of a video, a PDF with the frame of every presentation
+        /// stop (`slide_break` and scene ends). No ffmpeg needed.
+        #[arg(long)]
+        slides: Option<PathBuf>,
     },
     /// Type-check, then write a storyboard and a visual-lint report to out/check/.
     Check {
@@ -188,6 +214,23 @@ fn main() -> ExitCode {
             release,
             ui_dir,
             cpu,
+            present: false,
+            json: cli.json,
+        }),
+        Cmd::Present {
+            port,
+            no_open,
+            release,
+            ui_dir,
+            cpu,
+        } => dev::run(dev::DevArgs {
+            port,
+            open: !no_open,
+            no_open,
+            release,
+            ui_dir,
+            cpu,
+            present: true,
             json: cli.json,
         }),
         Cmd::Render {
@@ -199,6 +242,8 @@ fn main() -> ExitCode {
             aspect,
             cpu,
             no_audio,
+            subtitles,
+            slides,
         } => render::run(render::RenderArgs {
             out,
             scene,
@@ -208,6 +253,8 @@ fn main() -> ExitCode {
             aspect,
             cpu,
             no_audio,
+            subtitles,
+            slides,
             json: cli.json,
         }),
         Cmd::Check { frames } => check::run(frames, cli.json),

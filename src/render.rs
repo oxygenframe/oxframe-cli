@@ -17,6 +17,10 @@ pub struct RenderArgs {
     pub aspect: Option<String>,
     pub cpu: bool,
     pub no_audio: bool,
+    /// Spoken lines as .srt or .vtt.
+    pub subtitles: Option<std::path::PathBuf>,
+    /// A PDF of the presentation stops instead of a video.
+    pub slides: Option<std::path::PathBuf>,
     pub json: bool,
 }
 
@@ -30,7 +34,8 @@ pub fn run(a: RenderArgs) -> Done {
         Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
     // Check ffmpeg before a potentially long build.
-    let png = a.format.as_deref() == Some("png")
+    let png = a.slides.is_some()
+        || a.format.as_deref() == Some("png")
         || a.out
             .as_ref()
             .is_some_and(|o| o.extension().is_none() && a.format.is_none());
@@ -98,6 +103,12 @@ pub fn run(a: RenderArgs) -> Done {
     }
     if a.no_audio {
         cmd.arg("--no-audio");
+    }
+    if let Some(p) = &a.subtitles {
+        cmd.arg("--subtitles").arg(p);
+    }
+    if let Some(p) = &a.slides {
+        cmd.arg("--slides").arg(p);
     }
     cmd.args(cfg.theme.args());
     let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, a.json) {

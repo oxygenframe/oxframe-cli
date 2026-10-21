@@ -4,6 +4,17 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.18.0 — 2026-10-21
+
+- `oxframe present` opens the project as a presentation: full screen,
+  stopping at every `slide_break` and scene end; arrows, space, page keys
+  and clickers move between stops, N opens the speaker notes with a timer.
+- `oxframe render --slides talk.pdf` writes one PDF page per stop.
+- `oxframe render --subtitles out.srt` is passed to the project; before,
+  the CLI rejected the flag that the docs described.
+- Creates projects on oxframe 0.18.0; the agent cheat sheet covers
+  presentations, and a reference prompt in `evals/` makes a talk.
+
 ## 0.17.0 — 2026-10-21
 
 - Creates projects on oxframe 0.17.0.

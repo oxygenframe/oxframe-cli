@@ -78,6 +78,10 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 Needs `features = ["video"]` on `oxframe` and ffmpeg. `let demo = view.add(Video::new().file("assets/demo.mp4").width(pct(70)).radius(24.0));` then `demo.play()` (returns at once), `demo.pause()`, `demo.seek(2.0)`; `demo.playback_rate().to(0.25, 0.5)` and `demo.time()` are signals. Sound only at rate 1; `.muted(true)` drops it. Not in the browser playground.
 
+## Presentations
+
+`slide_break().await` is a stop for `oxframe present` (a render plays through, so put `wait_for(1.5).await` before each break or `check` reports `too_fast`); every scene ends with a stop, so don't fade out the last point — the next scene's transition does. `notes("…")` are speaker notes for the part up to the next stop. `oxframe render --slides talk.pdf` writes a page per stop.
+
 ## Matrices, vectors, tables
 
 `view.add(Matrix::new([[1, 2], [3, 4]]).font_size(64.0))`; cells are `Txt`: `m.cell(r, c)`, `m.row(r)`, `m.column(c)`; `m.row_frame(r)` / `column_frame(c)` / `cell_frame(r, c)` are hidden outlines to `.fade_in()`. On `Axes`: `axes.vector(x, y)` (tip `v.to(x, y, secs)`, `.label("v")`) and `axes.apply_matrix([[a, b], [c, d]], secs)` bends the grid and everything on it. `Table::new(["A", "B"]).row(["x", "1"])`, then `t.insert_row(i, [..])`, `t.remove_row(i)`, `t.sort_by_column(c, secs)` — await them.

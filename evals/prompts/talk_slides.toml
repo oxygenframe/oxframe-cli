@@ -1,0 +1,7 @@
+category = "slides"
+prompt = "Make a five-minute conference talk opening as an oxframe presentation: a title slide, then three points about why Rust is fast that appear one per click, then a closing slide. Add speaker notes for each part."
+requires = "slides"
+
+[expect]
+uses = ["slide_break", "notes"]
+min_seconds = 3

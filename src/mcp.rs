@@ -215,6 +215,8 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             aspect: arg_string(args, "aspect"),
             cpu: args["cpu"].as_bool().unwrap_or(false),
             no_audio: false,
+            subtitles: None,
+            slides: None,
             json: true,
         })),
         _ => (format!("unknown tool: {name}"), true),

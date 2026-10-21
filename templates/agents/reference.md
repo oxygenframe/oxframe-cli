@@ -106,6 +106,12 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - Deterministic: the frame comes from scene time. MP4 H.264, WebM VP9 and ProRes 4444 (alpha kept).
 - Sound joins the mix only while playing at rate 1. A file that cannot be opened is a dark box plus `video_unavailable` in `check`. The playground always shows the box.
 
+## Presentations
+
+- `slide_break().await`: stop for `oxframe present`; no effect on render/check — hold with `wait_for` before it so the video version is readable. Last frame of each scene is also a stop; a break at a scene's end merges with it.
+- `notes("…")`: speaker notes for the part ending at the next stop; several calls join with newlines.
+- `oxframe present` (keys: →/space/PageDown next, ←/PageUp back, Home, F full screen, N notes window). `oxframe render --slides out.pdf`: one page per stop.
+
 ## Matrices, vectors, tables
 
 - `Matrix::new(rows)` (numbers, `&str`, anything `Display`) → handle (Clone, derefs to `Node`): `cell(r, c) -> Txt`, `row(r)`, `column(c) -> Vec<Txt>`, `rows()`, `columns()`, `brackets() -> [Path; 2]`, `row_frame(r)`, `column_frame(c)`, `cell_frame(r, c) -> Rect` (hidden; `.fade_in()` / `.opacity().to(..)`). Builder: `.font_size(px)`, `.cell_width(px)` (room for later, longer values), `.column_gap`, `.row_gap`. Change a value: `m.cell(1, 0).text().set("7".into())`.
