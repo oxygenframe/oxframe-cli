@@ -106,6 +106,14 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - Deterministic: the frame comes from scene time. MP4 H.264, WebM VP9 and ProRes 4444 (alpha kept).
 - Sound joins the mix only while playing at rate 1. A file that cannot be opened is a dark box plus `video_unavailable` in `check`. The playground always shows the box.
 
+## Icons (feature `icons`)
+
+- `icon!("set:name")` → `IconBuilder`; sets `lucide:` (outlines), `tabler:` (outlines; `-filled` names are fills), `simple:` (brand logos, fills). Names as on lucide.dev, tabler.io/icons, simpleicons.org. Unknown name = compile error with the closest names. Only named icons go into the binary.
+- `.size(px)` (default 48, square), `.color(Ink | Color)` (default theme `Text`), `.stroke_width(w)` on the 24-unit grid (default 2).
+- Handle `Icon` (Clone, derefs to `Node`): `color() -> Signal<Color>`, `stroke_width() -> Signal<f64>`, `paths() -> Vec<Path>` (each can `draw_on()`), `style()` (`IconStyle::Stroke | Fill`).
+- `FlowDiagram::new().edge(a, b).icon(a, icon!(..))` puts the icon at the start of that card; `flow.icon(a) -> Option<Icon>`.
+- `Icon::from_svg(bytes, IconStyle::Stroke)` for a 24×24 SVG of your own.
+
 ## Nodes of your own (feature `unstable-node-api`)
 
 - `#[derive(Node)]` on a struct that implements `Draw` (`draw(&self, ctx: &mut DrawCtx)`, optional `size(&self) -> (f64, f64)`, default 100×100).

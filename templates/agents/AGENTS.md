@@ -78,6 +78,10 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 Needs `features = ["video"]` on `oxframe` and ffmpeg. `let demo = view.add(Video::new().file("assets/demo.mp4").width(pct(70)).radius(24.0));` then `demo.play()` (returns at once), `demo.pause()`, `demo.seek(2.0)`; `demo.playback_rate().to(0.25, 0.5)` and `demo.time()` are signals. Sound only at rate 1; `.muted(true)` drops it. Not in the browser playground.
 
+## Icons
+
+Needs `features = ["icons"]` on `oxframe`. `view.add(icon!("lucide:server").size(64.0).color(Accent))`; sets are `lucide:`, `tabler:` (`-filled` for filled) and `simple:` (brand logos). A wrong name fails to compile and lists the closest names. The handle's `color()` and `stroke_width()` are signals; `paths()` for `draw_on`. In a diagram: `FlowDiagram::new().edge("api", "db").icon("db", icon!("lucide:database"))`, then `flow.icon("db")`.
+
 ## Nodes of your own
 
 Needs `features = ["unstable-node-api"]` on the `oxframe` dependency.

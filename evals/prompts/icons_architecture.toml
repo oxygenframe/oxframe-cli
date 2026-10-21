@@ -1,0 +1,7 @@
+category = "icons"
+prompt = "Explain how a web request is served: a browser, a CDN, an API server, a cache and a database, as a diagram with a fitting icon on each box. Highlight the boxes one by one, then make the database icon flash red for a slow query."
+requires = "icons"
+
+[expect]
+uses = ["icon", "FlowDiagram", "color"]
+min_seconds = 3

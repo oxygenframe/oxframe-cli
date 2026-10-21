@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.16.0 — 2026-10-21
+
+- Creates projects on oxframe 0.16.0.
+- The agent cheat sheet covers icons: `icon!("lucide:server")`, the three
+  sets, `color()` and `stroke_width()`, and icons in `FlowDiagram`.
+- Reference prompts for icons in `evals/`: an architecture diagram and a
+  row of brand logos.
+
 ## 0.15.0 — 2026-10-21
 
 - Creates projects on oxframe 0.15.0.

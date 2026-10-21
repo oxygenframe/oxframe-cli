@@ -1,0 +1,7 @@
+category = "icons"
+prompt = "A 'built with' card: the GitHub, Rust and Cloudflare logos in a row, each fading in with its name under it, then a check-mark icon drawing itself under the row."
+requires = "icons"
+
+[expect]
+uses = ["icon", "draw_on"]
+min_seconds = 2
