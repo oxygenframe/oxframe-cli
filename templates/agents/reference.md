@@ -81,6 +81,24 @@ sea.amp().to(0.12, 1.2).await;
 
 The waves preset is rasterized and then drawn by whichever backend is running, including a check with no GPU. A custom `shade` is type-checked on every draw and is not executed yet. A shader that takes longer than the draft budget is `shader_slow`. An opaque shader painted over text is `covers_text`.
 
+### Shaders that read pixels
+
+```rust
+let lens = view.add(shaders::lens_drops().wetness(0.0).seed(7).fullscreen());
+lens.wetness().to(1.0, 0.4).await;
+
+let rings = sea.effect(shaders::ripple().strength(0.0));
+rings.strength().to(1.0, 0.4).await;
+
+transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
+```
+
+- `shaders::lens_drops()`: drops over everything drawn before this node, inside its box. Add it last and make it `.fullscreen()`. `.wetness()` 0..1 is a signal (default 0.6), `.seed()` places the drops, `.drop_size()` scales them. `.input("scene", Input::frame())` names the input; another name is `param_unknown`.
+- `node.effect(shaders::ripple())` returns an `Effect`. `.strength()` (default 1) and `.speed()` (default 6) are signals. Colors move outward from the node's center, the outline stays. One effect per node; a second call replaces it.
+- `Transition::shader(shaders::water_wipe())`: a wavy waterline rises; below it is the next scene, rippled near the line. `.wave()` sets the wave height (fraction of the frame, default 0.04). Nodes the next scene adds before `transition` are under the water.
+- A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect cannot read finished pixels: `check` reports `input_cycle` (an error) and draws without it. Put the effect on the group.
+- All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes. `Input::node`, `Input::image` and `.offscreen()` do not exist yet, and a custom `shade` still is not run.
+
 ## Transitions
 
 At the start of any scene except the first:

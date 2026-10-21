@@ -4,6 +4,13 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.12.0 — 2026-10-21
+
+- Creates projects on oxframe 0.12.0.
+- The agent cheat sheet covers `shaders::lens_drops()`, `.wetness()`,
+  `Node::effect`, `shaders::ripple()`, `Transition::shader` and
+  `shaders::water_wipe()`, and when `check` reports `input_cycle`.
+
 ## 0.11.0 — 2026-10-21
 
 - Creates projects on oxframe 0.11.0.

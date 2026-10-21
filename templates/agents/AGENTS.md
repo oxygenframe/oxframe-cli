@@ -85,6 +85,16 @@ sea.amp().to(0.12, 1.2).await;
 
 `Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. The waves preset is painted. A custom `shade` is type-checked on every draw.
 
+```rust
+let lens = view.add(shaders::lens_drops().wetness(0.0).fullscreen()); // add it last
+lens.wetness().to(1.0, 0.4).await;                                     // a splash
+let rings = sea.effect(shaders::ripple());                             // rings on a node
+rings.strength().to(0.0, 1.0).await;
+transition(Transition::shader(shaders::water_wipe())).await;           // next scene
+```
+
+`lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
+
 ## Rules
 
 - **Deterministic**: never use `std::time`, `Instant`, `rand::thread_rng` or other entropy; use `random()` / `random_range(a, b)` (seeded by `Project::seed`). Avoid iterating `HashMap` to decide what to draw; use `Vec`/`BTreeMap`.
