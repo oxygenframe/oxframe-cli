@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.12.2 — 2026-10-21
+
+- Creates projects on oxframe 0.12.1.
+- `list_components` in `oxframe mcp` showed calls that do not compile:
+  `BulletList::new().item(..)`, `CodeExplainer::caption`,
+  `FlowDiagram::node`, `Callout::new("text").point_at(..)` and arguments to
+  `enter`. It now shows the real API, each line checked against the SDK.
+
 ## 0.12.1 — 2026-10-21
 
 Still creates projects on oxframe 0.12.0.

@@ -259,16 +259,16 @@ fn storyboard_summary(body: &Value) -> String {
 const COMPONENTS: &str = "\
 Explainer components, all in the prelude. Add them like any node. They start invisible and take their colors from the theme.
 
-- TitleCard::new(\"The half\").subtitle(\"A worked example\") — opening card.
-- ChapterMarker::new(\"2\").label(\"The search\") — chapter tab on the top safe edge.
-- BulletList::new().item(\"First\").item(\"Second\") — a list that reveals one line at a time. next() returns the line's entrance.
-- CodeExplainer::new(\"fn main() {}\").caption(\"the whole program\") — a code card. next() focuses the following line.
-- FlowDiagram::new().node(\"a\", \"Parse\").node(\"b\", \"Run\").edge(\"a\", \"b\") — boxes in layers. .down() stacks the layers.
-- Callout::new(\"Watch the gap\").point_at(node) — a label with a line to a node.
+- TitleCard::new(\"The half\").subtitle(\"A worked example\") — opening card. next() reveals the subtitle.
+- ChapterMarker::new(\"2  The search\") — chapter tab on the top safe edge.
+- BulletList::new([\"First\", \"Second\"]) — rows stay hidden; each next() reveals one.
+- CodeExplainer::new(\"fn main() {}\").step(1, 1, \"the whole program\") — a code card. next() moves to the following step (lines first..=last and a caption).
+- FlowDiagram::new().edge(\"Parse\", \"Run\").edge(\"Run\", \"Print\") — boxes in layers from the edges. .down() stacks the layers.
+- Callout::new(node).text(\"Watch the gap\") — a label with a line to a node.
 - LowerThird::new(\"Ada\").role(\"walks the half\") — name plate on the bottom safe edge.
 - EndCard::new(\"That's the search\").note(\"Repeat from the top\") — closing card.
 
-Each has enter, next and exit. await enter(...), then next() per beat, then exit(...).
+Each has enter(), next() and exit(), with no arguments: card.enter().await, then card.next().await per beat, then card.exit().await.
 ";
 
 fn search_docs(query: &str) -> String {
