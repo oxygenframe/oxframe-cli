@@ -10,6 +10,22 @@ const META: &str = include_str!("../templates/default/src/intro.meta.json");
 const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
 
+const NODE_CARGO_TOML: &str = include_str!("../templates/node/Cargo.toml.tmpl");
+const NODE_LIB_RS: &str = include_str!("../templates/node/src/lib.rs");
+const NODE_DEMO_RS: &str = include_str!("../templates/node/examples/demo.rs");
+const NODE_TEST_RS: &str = include_str!("../templates/node/tests/reference.rs");
+const NODE_README: &str = include_str!("../templates/node/README.md");
+const NODE_GITIGNORE: &str = include_str!("../templates/node/gitignore");
+
+/// What `oxframe init` creates.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+pub enum Template {
+    /// A video project with one scene.
+    Default,
+    /// A library crate with a node of your own, a demo scene and a test.
+    Node,
+}
+
 /// SDK version this CLI is made for (pinned in generated projects).
 pub const SDK_VERSION: &str = "0.13.0";
 
@@ -22,14 +38,41 @@ fn valid_name(name: &str) -> bool {
 }
 
 pub fn oxframe_dependency(sdk_path: Option<&Path>) -> String {
+    dependency(sdk_path, "")
+}
+
+/// `oxframe = { … }` with `extra` (such as `, features = [..]`) appended.
+fn dependency(sdk_path: Option<&Path>, extra: &str) -> String {
     match sdk_path {
         Some(p) => {
             let crate_dir = p.join("crates/oxframe");
             let dir = crate_dir.canonicalize().unwrap_or(crate_dir);
-            format!("oxframe = {{ path = {:?} }}", dir.to_string_lossy())
+            format!("oxframe = {{ path = {:?}{extra} }}", dir.to_string_lossy())
         }
-        None => format!("oxframe = {{ version = \"={SDK_VERSION}\" }}"),
+        None => format!("oxframe = {{ version = \"={SDK_VERSION}\"{extra} }}"),
     }
+}
+
+/// A node crate: `src/lib.rs`, `examples/demo.rs`, `tests/reference.rs`.
+pub fn generate_node(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    let krate = name.replace('-', "_");
+    let dep = dependency(sdk_path, ", features = [\"unstable-node-api\"]");
+    let fill = |t: &str| {
+        t.replace("{{name}}", name)
+            .replace("{{crate}}", &krate)
+            .replace("{{oxframe_dep}}", &dep)
+    };
+    for sub in ["src", "examples", "tests"] {
+        std::fs::create_dir_all(dir.join(sub))?;
+    }
+    std::fs::write(dir.join("Cargo.toml"), fill(NODE_CARGO_TOML))?;
+    std::fs::write(dir.join("src/lib.rs"), fill(NODE_LIB_RS))?;
+    std::fs::write(dir.join("examples/demo.rs"), fill(NODE_DEMO_RS))?;
+    std::fs::write(dir.join("tests/reference.rs"), fill(NODE_TEST_RS))?;
+    std::fs::write(dir.join("README.md"), fill(NODE_README))?;
+    std::fs::write(dir.join(".gitignore"), NODE_GITIGNORE)?;
+    crate::agents::write(dir, false)?;
+    Ok(())
 }
 
 pub fn generate(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
@@ -49,7 +92,7 @@ pub fn generate(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Res
     Ok(())
 }
 
-pub fn run(name: &str, sdk_path: Option<&Path>) -> u8 {
+pub fn run(name: &str, template: Template, sdk_path: Option<&Path>) -> u8 {
     if !valid_name(name) {
         crate::error(format!(
             "`{name}` is not a valid project name: use lowercase letters, digits, `-` and `_`, starting with a letter"
@@ -61,11 +104,21 @@ pub fn run(name: &str, sdk_path: Option<&Path>) -> u8 {
         crate::error(format!("`{name}` already exists"));
         return exit::ENV;
     }
-    if let Err(e) = generate(dir, name, sdk_path) {
+    let made = match template {
+        Template::Default => generate(dir, name, sdk_path),
+        Template::Node => generate_node(dir, name, sdk_path),
+    };
+    if let Err(e) = made {
         crate::error(format!("cannot create project: {e}"));
         return exit::ENV;
     }
     crate::note(format!("created `{name}`"));
+    if template == Template::Node {
+        anstream::eprintln!(
+            "\n  cd {name}\n  cargo test                           # reference tests\n  cargo run --example demo -- render   # out/demo.mp4\n\nThe node API is behind the `unstable-node-api` feature and may change.\n"
+        );
+        return exit::OK;
+    }
     anstream::eprintln!(
         "\n  cd {name}\n  oxframe dev                 # editor with hot reload\n  oxframe check               # storyboard + report.json\n  oxframe snapshot --at 1     # one frame as PNG\n  oxframe render              # out/{name}.mp4\n\nAI agents: AGENTS.md and .claude/skills/oxframe explain the project to them.\n"
     );
@@ -82,6 +135,35 @@ mod tests {
         assert!(!valid_name("2fast"));
         assert!(!valid_name("Hello"));
         assert!(!valid_name("a b"));
+    }
+
+    #[test]
+    fn generates_a_node_crate() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("my-gauge");
+        generate_node(&dir, "my-gauge", None).unwrap();
+        let cargo = std::fs::read_to_string(dir.join("Cargo.toml")).unwrap();
+        assert!(cargo.contains("name = \"my-gauge\""));
+        assert!(
+            cargo.contains("features = [\"unstable-node-api\"]"),
+            "{cargo}"
+        );
+        let demo = std::fs::read_to_string(dir.join("examples/demo.rs")).unwrap();
+        assert!(demo.contains("use my_gauge::Gauge;"), "{demo}");
+        for f in [
+            "src/lib.rs",
+            "tests/reference.rs",
+            "README.md",
+            ".gitignore",
+            "AGENTS.md",
+        ] {
+            assert!(dir.join(f).exists(), "{f}");
+        }
+        assert!(
+            !std::fs::read_to_string(dir.join("tests/reference.rs"))
+                .unwrap()
+                .contains("{{")
+        );
     }
 
     #[test]

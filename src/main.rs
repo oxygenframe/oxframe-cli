@@ -51,6 +51,9 @@ enum Cmd {
     /// Create a new project.
     Init {
         name: String,
+        /// `node` makes a library crate with a node of your own.
+        #[arg(long, value_enum, default_value = "default")]
+        template: init::Template,
         /// Use a local oxframe-sdk checkout instead of crates.io.
         #[arg(long, env = "OXFRAME_SDK_PATH")]
         sdk_path: Option<PathBuf>,
@@ -163,8 +166,12 @@ fn main() -> ExitCode {
         update_check::run();
     }
     let done = match cli.command {
-        Cmd::Init { name, sdk_path } => {
-            let code = init::run(&name, sdk_path.as_deref());
+        Cmd::Init {
+            name,
+            template,
+            sdk_path,
+        } => {
+            let code = init::run(&name, template, sdk_path.as_deref());
             reply::done(cli.json, code, serde_json::json!({"command": "init"}))
         }
         Cmd::Dev {

@@ -1,0 +1,12 @@
+[package]
+name = "{{name}}"
+version = "0.1.0"
+edition = "2024"
+description = "An oxframe node"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+{{oxframe_dep}}
+
+[profile.dev.package."*"]
+opt-level = 2
