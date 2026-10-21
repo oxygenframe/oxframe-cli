@@ -112,6 +112,9 @@ enum Cmd {
         /// Time is measured from the start of this scene.
         #[arg(long)]
         scene: Option<String>,
+        /// Also list render passes.
+        #[arg(long)]
+        graph: bool,
     },
     /// Render single frames as PNG (default: out/snapshots/), e.g. `--at 1.5`.
     Snapshot {
@@ -201,7 +204,7 @@ fn main() -> ExitCode {
             json: cli.json,
         }),
         Cmd::Check { frames } => check::run(frames, cli.json),
-        Cmd::Inspect { at, scene } => check::inspect(at, scene, cli.json),
+        Cmd::Inspect { at, scene, graph } => check::inspect(at, scene, graph, cli.json),
         Cmd::Snapshot {
             at,
             out,

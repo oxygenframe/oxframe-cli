@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.8.0 — 2026-10-21
+
+- Creates projects on oxframe 0.8.0.
+- `oxframe inspect --graph` adds render passes to the scene JSON: a vector
+  pass, then a composite for each layer. Without the flag the JSON is unchanged.
+
 ## 0.6.0 — 2026-10-21
 
 - Creates projects on oxframe 0.6.0.

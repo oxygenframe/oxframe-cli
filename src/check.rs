@@ -228,7 +228,7 @@ pub fn run(frames: bool, json: bool) -> Done {
 }
 
 /// `oxframe inspect --at <seconds>`.
-pub fn inspect(at: f64, scene: Option<String>, json: bool) -> Done {
+pub fn inspect(at: f64, scene: Option<String>, graph: bool, json: bool) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
         Err(e) => return crate::reply::fail(json, exit::ENV, e),
@@ -267,6 +267,9 @@ pub fn inspect(at: f64, scene: Option<String>, json: bool) -> Done {
         .args(["inspect", "--at", &at.to_string()]);
     if let Some(scene) = &scene {
         cmd.args(["--scene", scene]);
+    }
+    if graph {
+        cmd.arg("--graph");
     }
     cmd.args(cfg.theme.args());
     let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, json) {

@@ -173,7 +173,7 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             let Some(at) = args["at"].as_f64() else {
                 return ("inspect needs a number `at` (seconds).".into(), true);
             };
-            text_of(check::inspect(at, arg_string(args, "scene"), true))
+            text_of(check::inspect(at, arg_string(args, "scene"), false, true))
         }
         "list_components" => (COMPONENTS.into(), false),
         "docs_search" => {

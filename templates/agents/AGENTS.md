@@ -22,7 +22,7 @@ version — the API changes between versions:
 | Goal | Command |
 |---|---|
 | **Check a change** (compile, then look) | `oxframe check` → `out/check/storyboard.png` and `out/check/report.json`. Exit 1 if any issue is an error. |
-| Scene tree at one time | `oxframe inspect --at 2.5` (JSON: kind, name, bounds, text, `file:line`; `transition` with kind and progress while one is playing) |
+| Scene tree at one time | `oxframe inspect --at 2.5` (JSON: kind, name, bounds, text, `file:line`; `transition` with kind and progress while one is playing). `--graph` adds `passes`: vector, then composite |
 | One full-size still | `oxframe snapshot --at 1.5` → prints the PNG path |
 | Scene length, markers | `cargo run -q -- info` (JSON) |
 | Final video | `oxframe render` → `out/<project>.mp4` (needs ffmpeg) |

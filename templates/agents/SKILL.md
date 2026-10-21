@@ -17,7 +17,7 @@ API https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/.
 2. Make the change. Prefer small, readable steps: one `.await` per beat of the story, `all((..))` for things that happen together.
 3. `oxframe check`. Fix compile errors first (see AGENTS.md, "Common compile errors"). Then open `out/check/storyboard.png` and `out/check/report.json`. Each issue names a rule, a time range, a node and `file:line`.
 4. Fix and run `oxframe check` again until it exits 0. Warnings do not fail the command; errors do.
-5. `oxframe inspect --at <t>` when a frame looks wrong and you need the node tree (kind, name, bounds, text). `oxframe snapshot --at <t>` for one full-size still.
+5. `oxframe inspect --at <t>` when a frame looks wrong and you need the node tree (kind, name, bounds, text). Add `--graph` to see render passes. `oxframe snapshot --at <t>` for one full-size still.
 6. Only then report. Mention the storyboard and which issues you fixed.
 
 Never run `oxframe dev` (interactive server). Never hand-edit `meta.json` unless asked.
