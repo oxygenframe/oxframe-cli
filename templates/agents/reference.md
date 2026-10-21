@@ -32,8 +32,8 @@ sound("assets/click.wav").trim(0.0, 0.2).priority().await;         // waits out 
 ## Voice
 
 ```rust
-let line = voice("Сначала нарисуем квадрат, а потом повернём его").start();
-line.at_word("квадрат").await;          // waits until that word
+let line = voice("First draw a square, then rotate it").start();
+line.at_word("square").await;          // waits until that word
 square.draw_on().await;
 line.await;                             // waits until the line ends
 ```
