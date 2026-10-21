@@ -1,0 +1,7 @@
+category = "custom-node"
+prompt = "Make a node of your own: a progress ring that draws an arc for a value from 0 to 1. Show three rings in a row that fill to 30 %, 70 % and 100 %."
+requires = "custom-nodes"
+
+[expect]
+uses = ["derive", "Draw", "signal"]
+min_seconds = 2

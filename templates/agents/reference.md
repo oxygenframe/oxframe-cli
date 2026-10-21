@@ -99,6 +99,14 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect cannot read finished pixels: `check` reports `input_cycle` (an error) and draws without it. Put the effect on the group.
 - All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes. `Input::node`, `Input::image` and `.offscreen()` do not exist yet, and a custom `shade` still is not run.
 
+## Nodes of your own (feature `unstable-node-api`)
+
+- `#[derive(Node)]` on a struct that implements `Draw` (`draw(&self, ctx: &mut DrawCtx)`, optional `size(&self) -> (f64, f64)`, default 100×100).
+- `#[signal]` fields: builder setter `Gauge::new().value(0.3)`, handle `GaugeHandle::value() -> Signal<f64>`. Other fields: builder setter only. All fields need `Default + Clone`.
+- `DrawCtx`: `line`, `circle`, `rect`, `arc(center, radius, start_deg, sweep_deg)`, `path`; then `.fill(paint)` or `.stroke(paint, width)`. Origin is the box center, y down. `ctx.time()`, `ctx.rng(seed)`.
+- The node gets x/y/rotation/scale/opacity, `to_edge`, effects, flex; `check` names it by its type. No children: compose with a `Group` instead.
+- `oxframe init --template node my-node` → crate with `src/lib.rs`, `examples/demo.rs`, `tests/reference.rs`.
+
 ## Charts
 
 ```rust

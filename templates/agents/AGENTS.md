@@ -74,6 +74,22 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 `voice("one two").start()` speaks now. `line.at_word("two").await` waits for that word; `line.await` waits until the end. Await the line, or `oxframe check` errors because it runs past the scene. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Pass a `TtsProvider` with `Project::tts`. Without one, the length is estimated. A real recording is cached under `tts/`; commit that folder so CI renders it without an API key. `oxframe render --subtitles out.srt` writes the lines (`.vtt` by extension).
 
+## Nodes of your own
+
+Needs `features = ["unstable-node-api"]` on the `oxframe` dependency.
+
+```rust
+#[derive(Node)]
+pub struct Gauge { #[signal] value: f64, #[signal] size: f64 }
+impl Draw for Gauge {
+    fn draw(&self, ctx: &mut DrawCtx) { ctx.arc((0.0, 0.0), self.size / 2.0, 135.0, 270.0 * self.value).stroke(Accent, 16.0); }
+    fn size(&self) -> (f64, f64) { (self.size, self.size) }
+}
+let g = view.add(Gauge::new().size(200.0));   // GaugeHandle; g.value() is a Signal
+```
+
+Draw only from the fields and `ctx.time()`. To combine existing nodes, write a function that adds them to a `Group` instead.
+
 ## Charts
 
 ```rust

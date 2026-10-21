@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.14.0 — 2026-10-21
+
+- Creates projects on oxframe 0.14.0.
+- `oxframe init --template node my-node` makes a library crate with a node
+  of your own (`#[derive(Node)]` plus `Draw`), a demo scene in
+  `examples/demo.rs` and a reference test.
+- The agent cheat sheet covers nodes of your own.
+
 ## 0.13.0 — 2026-10-21
 
 - Creates projects on oxframe 0.13.0.
