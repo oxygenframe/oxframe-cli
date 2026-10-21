@@ -73,6 +73,18 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 `voice("one two").start()` speaks now. `line.at_word("two").await` waits for that word; `line.await` waits until the end. Await the line, or `oxframe check` errors because it runs past the scene. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Pass a `TtsProvider` with `Project::tts`. Without one, the length is estimated. A real recording is cached under `tts/`; commit that folder so CI renders it without an API key. `oxframe render --subtitles out.srt` writes the lines (`.vtt` by extension).
 
+## Shaders
+
+```rust
+let sea = view.add(shaders::waves().amp(0.05).deep(Accent).foam(Surface)
+    .width(pct(100)).height(pct(40)).to_edge(Edge::Bottom));
+sea.amp().to(0.12, 1.2).await;
+```
+
+`shaders::waves()` is a node. `.amp()`, `.speed()`, `.deep()` and `.foam()` are signals. A theme role such as `Accent` follows the theme. The node is a box and has no children; put a title on the view.
+
+`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. The waves preset is painted. A custom `shade` is type-checked on every draw.
+
 ## Rules
 
 - **Deterministic**: never use `std::time`, `Instant`, `rand::thread_rng` or other entropy; use `random()` / `random_range(a, b)` (seeded by `Project::seed`). Avoid iterating `HashMap` to decide what to draw; use `Vec`/`BTreeMap`.

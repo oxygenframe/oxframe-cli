@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.11.0 — 2026-10-21
+
+- Creates projects on oxframe 0.11.0.
+- The agent cheat sheet covers `shaders::waves()`, `.amp()`, `Shader::source`
+  and `Shader::file`.
+
 ## 0.10.0 — 2026-10-21
 
 - Creates projects on oxframe 0.10.0.

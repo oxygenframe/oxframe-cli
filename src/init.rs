@@ -11,7 +11,7 @@ const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
 
 /// SDK version this CLI is made for (pinned in generated projects).
-pub const SDK_VERSION: &str = "0.10.0";
+pub const SDK_VERSION: &str = "0.11.0";
 
 fn valid_name(name: &str) -> bool {
     !name.is_empty()

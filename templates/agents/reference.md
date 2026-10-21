@@ -67,6 +67,20 @@ The first render writes `tts/{hash}.wav` and `tts/{hash}.json`. The next render 
 
 `oxframe render --subtitles out.srt` writes the lines. A path ending in `.vtt` writes WebVTT. `--no-audio` still writes them, and `--range` shifts the cues.
 
+## Shaders
+
+```rust
+let sea = view.add(shaders::waves().amp(0.05).deep(Accent).foam(Surface)
+    .width(pct(100)).height(pct(40)).to_edge(Edge::Bottom));
+sea.amp().to(0.12, 1.2).await;
+```
+
+`shaders::waves()` paints a crest. `.amp()`, `.speed()`, `.deep()` and `.foam()` are signals. `.deep(Accent)` follows the theme. The node is a box and has no children.
+
+`Shader::source(wgsl)` and `Shader::file(path)` take WGSL that defines `struct Params`, `@group(1) @binding(0) var<uniform> p: Params`, and `fn shade(i: ShadeIn) -> vec4<f32>`. oxframe adds `ox` (`time`, `frame`, `resolution`, `size`, `seed`, `view`, `progress`) and `ShadeIn` (`uv`, `local`, `world`, `screen`). `.uniform("name", 0.3)` sets a number; a color uses `.uniform_color`. A name or type that is not in `Params` is `param_unknown`. WGSL that does not compile is `shader_error`, with the line in your source. `Shader::file` is read on every draw, so saving the file updates the scene without a rebuild.
+
+The waves preset is rasterized and then drawn by whichever backend is running, including a check with no GPU. A custom `shade` is type-checked on every draw and is not executed yet. A shader that takes longer than the draft budget is `shader_slow`. An opaque shader painted over text is `covers_text`.
+
 ## Transitions
 
 At the start of any scene except the first:
