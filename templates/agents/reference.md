@@ -106,6 +106,14 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - Deterministic: the frame comes from scene time. MP4 H.264, WebM VP9 and ProRes 4444 (alpha kept).
 - Sound joins the mix only while playing at rate 1. A file that cannot be opened is a dark box plus `video_unavailable` in `check`. The playground always shows the box.
 
+## 3D (feature `3d`)
+
+- `Scene3d::new()`: world; `.add(Mesh) -> Object3d`, `.light(Light) -> Light3d`, `.camera() -> Camera3d` (`position()`, `target()`, `fov()` signals), `.ambient()`, `.background()` (transparent default), `.world_point(&obj, Vec3)`.
+- `Mesh::cube() | sphere() | plane() | cylinder() | group() | glb_file(path) | glb(bytes)`; builder `.position(v)`, `.rotation(deg Vec3)`, `.scale(k)`, `.scale3(v)`, `.color(paint)`, `.metallic(0..1)`, `.roughness(0..1)`, `.emissive(c)`, `.opacity(a)`.
+- `Object3d` signals: `position()`, `rotation()` (degrees XYZ, past 360 = more turns), `orientation()` (Quat), `scale()`, `color()`, `metallic()`, `roughness()`, `emissive()`, `opacity()`; `.add(Mesh)` for children.
+- `Light::directional(dir)`, `Light::point(pos)`, `.color()`, `.intensity()`. Default sunlight when none is added.
+- `View3d::new(&scene).size(w, h)`, `.samples(1..4)` (default 2), `.resolution(k)`; handle `width()`, `height()`, `project(Vec3)`, `projector()` (use in `bind`). `Vec3::new(x, y, z)`, Y up.
+
 ## Presentations
 
 - `slide_break().await`: stop for `oxframe present`; no effect on render/check — hold with `wait_for` before it so the video version is readable. Last frame of each scene is also a stop; a break at a scene's end merges with it.

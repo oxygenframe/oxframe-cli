@@ -78,6 +78,10 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 Needs `features = ["video"]` on `oxframe` and ffmpeg. `let demo = view.add(Video::new().file("assets/demo.mp4").width(pct(70)).radius(24.0));` then `demo.play()` (returns at once), `demo.pause()`, `demo.seek(2.0)`; `demo.playback_rate().to(0.25, 0.5)` and `demo.time()` are signals. Sound only at rate 1; `.muted(true)` drops it. Not in the browser playground.
 
+## 3D
+
+Needs `features = ["3d"]`. `let world = Scene3d::new(); let cube = world.add(Mesh::cube().color(Accent));` then `view.add(View3d::new(&world).size(640.0, 400.0))` — the view is a 2D node. `cube.rotation().to(Vec3::new(0.0, 360.0, 0.0), 3.0)` (degrees), `world.camera().position()`, `world.light(Light::directional((-2.0, -4.0, -1.0)))`. For a 2D label on a 3D point use `let to_view = frame.projector();` inside `bind` (not `frame.project`). Y is up, shapes are 1 unit. No shadows.
+
 ## Presentations
 
 `slide_break().await` is a stop for `oxframe present` (a render plays through, so put `wait_for(1.5).await` before each break or `check` reports `too_fast`); every scene ends with a stop, so don't fade out the last point — the next scene's transition does. `notes("…")` are speaker notes for the part up to the next stop. `oxframe render --slides talk.pdf` writes a page per stop.

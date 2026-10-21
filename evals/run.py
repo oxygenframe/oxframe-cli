@@ -39,7 +39,7 @@ PROMPTS = HERE / "prompts"
 RESULTS = HERE / "results"
 
 # Features that are not in the SDK yet; prompts that need them are skipped.
-AVAILABLE = {"camera", "components", "themes", "aspects", "transitions", "sound", "voice", "shaders", "custom-nodes", "video", "icons", "matrices", "slides"}
+AVAILABLE = {"camera", "components", "themes", "aspects", "transitions", "sound", "voice", "shaders", "custom-nodes", "video", "icons", "matrices", "slides", "3d"}
 
 ASPECT_HINTS = {
     "16:9": r"Landscape|16\s*:\s*9",

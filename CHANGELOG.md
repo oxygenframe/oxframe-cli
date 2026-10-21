@@ -4,6 +4,13 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.19.0 — 2026-10-21
+
+- Creates projects on oxframe 0.19.0.
+- The agent cheat sheet covers 3D: `Scene3d`, meshes and materials,
+  `View3d`, the camera and lights, and 2D labels on 3D points; a reference
+  prompt in `evals/` puts a model in a diagram.
+
 ## 0.18.0 — 2026-10-21
 
 - `oxframe present` opens the project as a presentation: full screen,

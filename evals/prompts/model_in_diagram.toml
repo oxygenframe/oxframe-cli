@@ -1,0 +1,7 @@
+category = "3d"
+prompt = "A short explainer: a lit 3D sphere and cube side by side in the middle of the frame, a title above, and two 2D labels with leader lines that stay on the objects while the camera slowly orbits them."
+requires = "3d"
+
+[expect]
+uses = ["Scene3d", "View3d", "projector"]
+min_seconds = 3
