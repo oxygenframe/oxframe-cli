@@ -40,7 +40,30 @@ line.await;                             // waits until the line ends
 
 `voice("one two").start()` speaks now and returns a handle. `.at_word()` matches the word with surrounding punctuation stripped and panics if it is missing, listing the words. Awaiting the line waits until the end. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Await the line: one that runs past the scene is an error from `oxframe check`, and two overlapping lines are a warning.
 
-`Project::tts(provider)` supplies audio and word times through a `TtsProvider`. The provider reads its own API key. A missing key or a failed call falls back to a speech-rate estimate (2.5 words per second, at least 0.3s) and the scene still runs. Each line is cached under `tts/` next to the scene. Commit that folder so CI renders the real audio without a key. An estimate is not cached. With no provider, a committed cache is still found by the line text. The playground always estimates.
+oxframe does not call a speech service. Implement `TtsProvider` and pass it to `Project::tts`. `synthesize` gets `TtsRequest` (`text`, `voice`) and returns `Synthesis`: `rate`, mono `i16` `samples`, and `words` (`TimedWord`: `text`, `start`, `end` in seconds from the start of the samples). `.at_word()` waits on those times. Read the API key from the environment inside the provider.
+
+```rust
+use oxframe::{Synthesis, TtsProvider, TtsRequest};
+
+struct ElevenLabs;
+
+impl TtsProvider for ElevenLabs {
+    fn id(&self) -> &str { "elevenlabs" }   // part of the cache key
+
+    fn synthesize(&self, req: &TtsRequest) -> Result<Synthesis, String> {
+        let key = std::env::var("ELEVENLABS_API_KEY")
+            .map_err(|_| "set ELEVENLABS_API_KEY".to_string())?;
+        let (rate, samples, words) = speak(&key, req.voice, req.text)?;
+        Ok(Synthesis { rate, samples, words })
+    }
+}
+
+Project::new("explainer").tts(ElevenLabs).speaker("Rachel")
+    .audio(Audio::track("assets/music.mp3").duck_under_voice())
+    .scene(intro())
+```
+
+The first render writes `tts/{hash}.wav` and `tts/{hash}.json`. The next render plays the file. Commit that folder so CI has the audio without a key. A missing key or a failed call falls back to a speech-rate estimate (2.5 words per second, at least 0.3s) and the scene still runs, with no speech audio. An estimate is not cached. With no provider, a committed cache is still found by the line text. The playground always estimates.
 
 `oxframe render --subtitles out.srt` writes the lines. A path ending in `.vtt` writes WebVTT. `--no-audio` still writes them, and `--range` shifts the cues.
 
