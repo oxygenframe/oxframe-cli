@@ -49,6 +49,8 @@ jobs:
       - if: github.event_name == 'schedule'
         name: Use the latest editor-ui release
         run: ./scripts/fetch-ui.sh latest
+        # Fine-grained PAT with contents: read on oxygenframe/oxframe-web.
+        env: { GH_TOKEN: "${{ secrets.OXFRAME_WEB_READ_TOKEN }}" }
       - run: cargo test --test e2e -- --ignored --nocapture
 
   deny:
