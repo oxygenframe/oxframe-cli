@@ -1,0 +1,7 @@
+category = "sound"
+prompt = """A one-second scene. A circle grows, and at that same moment play a sound effect with sound(\"assets/click.wav\").trim(0.0, 0.2).play(). Do not wait for the file: the clip length comes from trim."""
+requires = "sound"
+
+[expect]
+uses = ["sound", "trim", "play"]
+min_seconds = 0.5

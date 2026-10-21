@@ -1,0 +1,7 @@
+category = "sound"
+prompt = """A short scene with a soundtrack and one effect. Build the soundtrack with Audio::track(\"assets/music.mp3\").duck_under_voice(), and play sound(\"assets/hit.wav\").trim(0.0, 0.3).priority().play(). The files do not have to exist. Keep the video under three seconds."""
+requires = "sound"
+
+[expect]
+uses = ["Audio", "duck_under_voice", "sound", "priority"]
+min_seconds = 0.3

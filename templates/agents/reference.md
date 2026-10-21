@@ -17,6 +17,18 @@ fn main() {
 }
 ```
 
+## Sound
+
+```rust
+.audio(Audio::track("assets/music.mp3").duck_under_voice().volume(0.8).master_fade(0.2, 0.4))
+// a path still works: .audio("assets/music.mp3")
+
+sound("assets/whoosh.wav").volume(0.6).fade_in(0.05).play();       // starts now, does not wait
+sound("assets/click.wav").trim(0.0, 0.2).priority().await;         // waits out the slice
+```
+
+`.play()` records the clip at the current frame and continues. Awaiting waits until the clip ends. `.trim(start, end)` is the length of that wait and does not need to open the file. `.priority()` ducks a soundtrack built with `.duck_under_voice()`. Effects are clips on the timeline and play during playback and seeking. `oxframe render` mixes them with the soundtrack before ffmpeg encodes; `--no-audio` drops both, and `--range` keeps only the part inside the range. Dragging the waveform changes the soundtrack offset in `meta.json`.
+
 ## Transitions
 
 At the start of any scene except the first:

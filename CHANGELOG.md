@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.9.0 — 2026-10-21
+
+- Creates projects on oxframe 0.9.0.
+- The agent cheat sheet covers `sound`, `Audio::track`, `.play()`, `.trim()`,
+  `.priority()` and `.duck_under_voice()`.
+
 ## 0.8.0 — 2026-10-21
 
 - Creates projects on oxframe 0.8.0.
