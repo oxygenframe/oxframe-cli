@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.15.0 — 2026-10-21
+
+- Creates projects on oxframe 0.15.0.
+- The agent cheat sheet covers `Video`: playing, pausing, seeking and
+  slowing down a clip, and the `video` feature it needs.
+
 ## 0.14.0 — 2026-10-21
 
 - Creates projects on oxframe 0.14.0.

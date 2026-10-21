@@ -99,6 +99,13 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect cannot read finished pixels: `check` reports `input_cycle` (an error) and draws without it. Put the effect on the group.
 - All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes. `Input::node`, `Input::image` and `.offscreen()` do not exist yet, and a custom `shade` still is not run.
 
+## Video (feature `video`, needs ffmpeg)
+
+- `Video::new().file(path)` + `.width(px | pct())` / `.height()` (other side keeps the clip's aspect), `.radius(r)`, `.muted(true)`, `.playback_rate(r)`, `.start_at(seconds)`.
+- Handle: `play()` (returns at once, plays alongside the scene), `pause()`, `seek(seconds)`, `time() -> Signal<f64>` (seconds into the clip; animate it to scrub), `playback_rate() -> Signal<f64>`, `duration()`, `is_playing()`.
+- Deterministic: the frame comes from scene time. MP4 H.264, WebM VP9 and ProRes 4444 (alpha kept).
+- Sound joins the mix only while playing at rate 1. A file that cannot be opened is a dark box plus `video_unavailable` in `check`. The playground always shows the box.
+
 ## Nodes of your own (feature `unstable-node-api`)
 
 - `#[derive(Node)]` on a struct that implements `Draw` (`draw(&self, ctx: &mut DrawCtx)`, optional `size(&self) -> (f64, f64)`, default 100×100).

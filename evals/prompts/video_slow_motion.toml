@@ -1,0 +1,7 @@
+category = "video"
+prompt = "Put assets/demo.mp4 in a rounded frame on the left with a caption on the right. Play it, and after two seconds ease into quarter-speed slow motion, then back to normal. The clip's sound should play while it runs at normal speed."
+requires = "video"
+
+[expect]
+uses = ["Video", "play", "playback_rate"]
+min_seconds = 3

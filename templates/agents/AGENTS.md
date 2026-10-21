@@ -74,6 +74,10 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 `voice("one two").start()` speaks now. `line.at_word("two").await` waits for that word; `line.await` waits until the end. Await the line, or `oxframe check` errors because it runs past the scene. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Pass a `TtsProvider` with `Project::tts`. Without one, the length is estimated. A real recording is cached under `tts/`; commit that folder so CI renders it without an API key. `oxframe render --subtitles out.srt` writes the lines (`.vtt` by extension).
 
+## Video
+
+Needs `features = ["video"]` on `oxframe` and ffmpeg. `let demo = view.add(Video::new().file("assets/demo.mp4").width(pct(70)).radius(24.0));` then `demo.play()` (returns at once), `demo.pause()`, `demo.seek(2.0)`; `demo.playback_rate().to(0.25, 0.5)` and `demo.time()` are signals. Sound only at rate 1; `.muted(true)` drops it. Not in the browser playground.
+
 ## Nodes of your own
 
 Needs `features = ["unstable-node-api"]` on the `oxframe` dependency.
