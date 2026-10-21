@@ -1,0 +1,7 @@
+category = "matrices"
+prompt = "A leaderboard of five programming languages with their benchmark times. Add a sixth language in the middle, then sort the table by time so the rows slide into order, and highlight the winner."
+requires = "matrices"
+
+[expect]
+uses = ["Table", "insert_row", "sort_by_column"]
+min_seconds = 3

@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.17.0 — 2026-10-21
+
+- Creates projects on oxframe 0.17.0.
+- The agent cheat sheet covers `Matrix`, vectors and `apply_matrix` on
+  axes, and `Table` with animated rows.
+- Reference prompts in `evals/`: matrix multiplication step by step and
+  a table that sorts itself.
+
 ## 0.16.0 — 2026-10-21
 
 - Creates projects on oxframe 0.16.0.

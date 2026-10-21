@@ -1,0 +1,7 @@
+category = "matrices"
+prompt = "Explain multiplying a 2 by 2 matrix by another 2 by 2 matrix. For each cell of the result, outline the row of the first matrix and the column of the second, show the sum of products, then fill in the cell."
+requires = "matrices"
+
+[expect]
+uses = ["Matrix", "row_frame", "column_frame"]
+min_seconds = 4
