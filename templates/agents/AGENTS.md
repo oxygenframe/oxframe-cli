@@ -30,7 +30,8 @@ version — the API changes between versions:
 Add `--json` to any command for one JSON object on stdout (`ok`, `exit`, and
 on a compile error `diagnostics` plus `hints`). `oxframe mcp` is an MCP server
 on stdio with tools `check`, `storyboard`, `render_frame`, `inspect`,
-`list_components`, `docs_search` and `render`.
+`render_graph` (the render passes at one time), `list_components`,
+`docs_search` and `render`.
 
 `oxframe dev` is an interactive editor server for humans; do not run it in an
 agent session (it never exits).
@@ -93,7 +94,18 @@ rings.strength().to(0.0, 1.0).await;
 transition(Transition::shader(shaders::water_wipe())).await;           // next scene
 ```
 
-`lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
+Pick a preset before writing WGSL:
+
+| You want | Use |
+| --- | --- |
+| A sea or a moving water background | `shaders::waves()`, a box node |
+| Spray, sparks, rain | `Particles::new().seed(7)` with `.burst()`, or `Custom` with `ctx.rng(seed)` |
+| A wet camera lens | `shaders::lens_drops()`, added last, `.fullscreen()` |
+| Rings on water, text or an image | `node.effect(shaders::ripple())` |
+| A scene change through water | `Transition::shader(shaders::water_wipe())` |
+| Anything else | `Custom`; your own WGSL is checked, not run |
+
+Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
 
 ## Rules
 

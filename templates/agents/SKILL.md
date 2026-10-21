@@ -9,7 +9,7 @@ The project is on oxframe {{SDK_VERSION}}: docs https://oxframe.dev/docs/{{DOCS_
 model text https://oxframe.dev/docs/{{DOCS_SERIES}}/llms.txt
 (and https://oxframe.dev/docs/{{DOCS_SERIES}}/llms-full.txt),
 API https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/.
-`oxframe mcp` exposes check, inspect, render_frame and docs_search. `oxframe --json check` prints one JSON object.
+`oxframe mcp` exposes check, inspect, render_graph, render_frame and docs_search. `oxframe --json check` prints one JSON object.
 
 ## Workflow
 

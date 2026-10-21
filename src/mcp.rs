@@ -100,6 +100,18 @@ fn tools() -> Vec<Value> {
             }),
         ),
         tool(
+            "render_graph",
+            "Render passes at one time, in the order they run: vector passes, layers composited over the frame (opacity, blend, blur, clip), and effect passes with their shader (lens_drops reads the frame, ripple changes one node). Use it to see why a shader is skipped or a layer is costly.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "at": { "type": "number", "description": "Time in seconds." },
+                    "scene": { "type": "string" }
+                },
+                "required": ["at"]
+            }),
+        ),
+        tool(
             "list_components",
             "The explainer components (TitleCard, BulletList, CodeExplainer, FlowDiagram, Callout, LowerThird, EndCard, ChapterMarker) and a one-line example of each.",
             json!({ "type": "object", "properties": {} }),
@@ -175,6 +187,17 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             };
             text_of(check::inspect(at, arg_string(args, "scene"), false, true))
         }
+        "render_graph" => {
+            let Some(at) = args["at"].as_f64() else {
+                return ("render_graph needs a number `at` (seconds).".into(), true);
+            };
+            let done = check::inspect(at, arg_string(args, "scene"), true, true);
+            let failed = done.code != exit::OK;
+            (
+                serde_json::to_string_pretty(&passes_only(done.body)).unwrap_or_default(),
+                failed,
+            )
+        }
         "list_components" => (COMPONENTS.into(), false),
         "docs_search" => {
             let query = args["query"].as_str().unwrap_or("").trim();
@@ -211,6 +234,14 @@ fn arg_string(args: &Value, key: &str) -> Option<String> {
         .map(str::trim)
         .filter(|s| !s.is_empty())
         .map(str::to_owned)
+}
+
+/// `inspect --graph` without the node tree: the time, the frame and the passes.
+fn passes_only(mut body: Value) -> Value {
+    if let Some(inspect) = body.get_mut("inspect").and_then(Value::as_object_mut) {
+        inspect.retain(|k, _| matches!(k.as_str(), "time" | "frame" | "passes" | "transition"));
+    }
+    body
 }
 
 fn storyboard_summary(body: &Value) -> String {
@@ -355,6 +386,7 @@ mod tests {
             "storyboard",
             "render_frame",
             "inspect",
+            "render_graph",
             "list_components",
             "docs_search",
             "render",
@@ -412,6 +444,32 @@ mod tests {
         }))
         .unwrap();
         assert_eq!(frame["result"]["isError"], true);
+        let graph = handle(&json!({
+            "jsonrpc": "2.0",
+            "id": 8,
+            "method": "tools/call",
+            "params": { "name": "render_graph", "arguments": {} }
+        }))
+        .unwrap();
+        assert_eq!(graph["result"]["isError"], true);
+    }
+
+    #[test]
+    fn render_graph_keeps_the_passes_and_drops_the_nodes() {
+        let body = json!({
+            "ok": true,
+            "inspect": {
+                "time": 2.5,
+                "frame": 75,
+                "nodes": [{ "id": 1 }],
+                "passes": [{ "kind": "effect", "shader": "lens_drops" }],
+                "size": [1920, 1080]
+            }
+        });
+        let out = passes_only(body);
+        assert_eq!(out["inspect"]["passes"][0]["shader"], "lens_drops");
+        assert!(out["inspect"].get("nodes").is_none());
+        assert_eq!(out["ok"], true);
     }
 
     #[test]

@@ -1,0 +1,7 @@
+category = "shader"
+prompt = "Two scenes. First a title, \"Low tide\". Then the water rises over the whole frame and washes the first scene away into an end card that says \"High tide\"."
+requires = "shaders"
+
+[expect]
+uses = ["Transition::shader", "water_wipe", "EndCard"]
+min_seconds = 2

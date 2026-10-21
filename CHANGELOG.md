@@ -4,6 +4,19 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.12.1 — 2026-10-21
+
+Still creates projects on oxframe 0.12.0.
+
+- `oxframe mcp` has `render_graph`: the render passes at one time, as
+  `oxframe inspect --graph` gives them but without the node tree. An agent
+  sees that `lens_drops` or `ripple` runs, or why a shader is skipped.
+- The agent cheat sheet has a preset catalog (waves, particles, lens drops,
+  ripple, the water wipe, `Custom`) and says to make events signal changes,
+  not formulas of `ox.time`.
+- Five reference prompts for shaders in `evals/`, from a sea under a title
+  to the whole ocean scene.
+
 ## 0.12.0 — 2026-10-21
 
 - Creates projects on oxframe 0.12.0.

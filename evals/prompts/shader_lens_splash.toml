@@ -1,0 +1,7 @@
+category = "shader"
+prompt = "Waves along the bottom. A big wave hits and water splashes onto the camera lens: the picture gets covered in drops that bend everything behind them. Start with a dry lens."
+requires = "shaders"
+
+[expect]
+uses = ["lens_drops", "wetness"]
+min_seconds = 2

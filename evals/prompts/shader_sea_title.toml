@@ -1,0 +1,7 @@
+category = "shader"
+prompt = "A title at the top, \"Deep water\", and the sea filling the bottom third of the frame. After the title appears, the waves slowly grow taller."
+requires = "shaders"
+
+[expect]
+uses = ["waves", "amp"]
+min_seconds = 2

@@ -1,0 +1,7 @@
+category = "shader"
+prompt = "Calm water across the lower half. A drop lands in the middle and rings spread across the water, then the water calms down again."
+requires = "shaders"
+
+[expect]
+uses = ["effect", "ripple", "strength"]
+min_seconds = 2
