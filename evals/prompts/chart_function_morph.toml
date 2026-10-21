@@ -1,0 +1,6 @@
+category = "chart"
+prompt = "Axes from -5 to 5. Draw y = sin(x), move a dot along it from left to right, then turn the curve into y = sin(2x) and zoom out to -10..10."
+
+[expect]
+uses = ["Axes", "plot", "to_fn"]
+min_seconds = 4

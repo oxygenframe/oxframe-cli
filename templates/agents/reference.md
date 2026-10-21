@@ -99,6 +99,26 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect cannot read finished pixels: `check` reports `input_cycle` (an error) and draws without it. Put the effect on the group.
 - All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes. `Input::node`, `Input::image` and `.offscreen()` do not exist yet, and a custom `shade` still is not run.
 
+## Charts
+
+```rust
+let axes = view.add(Axes::new().x_range(-5.0..5.0).y_range(-2.0..2.0).width(pct(80)).height(pct(60)));
+let wave = axes.plot(|x| x.sin()).stroke(Accent).width(4.0);
+wave.draw_on().await;
+let x = Signal::new(-5.0);
+let dot = axes.point_on(&wave, x.clone());      // a Circle on the curve
+x.to(5.0, 2.0).await;
+wave.to_fn(|x| (2.0 * x).sin(), 1.0).await;      // every x moves to the new value
+axes.x_range().to(-10.0..10.0, 1.0).await;        // Signal<Interval>; ranges animate
+```
+
+- A plot is sampled every frame (finer where it bends), breaks at jumps (`tan` has no vertical bridges) and is cut at the box. `Plot` derefs to `Path`.
+- `axes.c2p(x, y)` is the scene point of data `(x, y)`; `axes.place(node, x, y)` keeps a node there while the ranges move.
+- `axes.bars([3.2, 7.5])` → `Bars`: values above the bars, `.labels(["rustc", "gcc"])` under them, `bars.value(i)` is a signal. With bars the y axis is at the left edge; use x range `-0.5..n - 0.5`.
+- `axes.line_series([(0.0, 1.0), (1.0, 3.0)])` → a polyline (`series.point(i)` is a signal); `axes.scatter(points)` → dots.
+- `NumberLine::new(0.0..10.0)` is an `Axes` without a y axis (`place`, `c2p` work).
+- `.no_grid()` hides the grid. Labels and lines take theme colors. Pie charts are not built in: draw slices with `Custom`.
+
 ## Transitions
 
 At the start of any scene except the first:

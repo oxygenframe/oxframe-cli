@@ -1,0 +1,6 @@
+category = "chart"
+prompt = "A number line from 0 to 10. A marker starts at 2 and slides to 7 while a label above it shows its value."
+
+[expect]
+uses = ["NumberLine"]
+min_seconds = 2

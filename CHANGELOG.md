@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.13.0 — 2026-10-21
+
+- Creates projects on oxframe 0.13.0.
+- The agent cheat sheet covers charts: `Axes`, `axes.plot`, `point_on`,
+  `to_fn`, `bars`, `line_series`, `scatter` and `NumberLine`.
+- Reference prompts for charts in `evals/`: a function that morphs and a
+  number line, and the benchmark and line prompts now expect the chart API.
+
 ## 0.12.2 — 2026-10-21
 
 - Creates projects on oxframe 0.12.1.

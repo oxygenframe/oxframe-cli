@@ -74,6 +74,17 @@ See `.claude/skills/oxframe/reference.md` for the full API cheat sheet.
 
 `voice("one two").start()` speaks now. `line.at_word("two").await` waits for that word; `line.await` waits until the end. Await the line, or `oxframe check` errors because it runs past the scene. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Pass a `TtsProvider` with `Project::tts`. Without one, the length is estimated. A real recording is cached under `tts/`; commit that folder so CI renders it without an API key. `oxframe render --subtitles out.srt` writes the lines (`.vtt` by extension).
 
+## Charts
+
+```rust
+let axes = view.add(Axes::new().x_range(-5.0..5.0).y_range(-2.0..2.0));
+let wave = axes.plot(|x| x.sin()).stroke(Accent);
+wave.draw_on().await;
+axes.x_range().to(-10.0..10.0, 1.0).await;   // the curve, grid and labels follow
+```
+
+`axes.point_on(&wave, x_signal)` rides a dot on the curve; `wave.to_fn(|x| x.cos(), 1.0)` morphs it. Bars: `axes.bars([0.0, 0.0]).labels(["a", "b"])`, then `bars.value(0).to(3.2, 1.0)`, x range `-0.5..n - 0.5`. `NumberLine::new(0.0..10.0)` is one axis. No pie chart: use `Custom`.
+
 ## Shaders
 
 ```rust
