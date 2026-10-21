@@ -1,0 +1,7 @@
+category = "voice"
+prompt = """A two-second scene. Speak the line voice(\"one two three\").start(). When the word two starts, grow a circle with at_word, then await the line so it is not cut off. Do not call a network provider."""
+requires = "voice"
+
+[expect]
+uses = ["voice", "start", "at_word"]
+min_seconds = 0.8

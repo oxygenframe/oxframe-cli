@@ -29,6 +29,21 @@ sound("assets/click.wav").trim(0.0, 0.2).priority().await;         // waits out 
 
 `.play()` records the clip at the current frame and continues. Awaiting waits until the clip ends. `.trim(start, end)` is the length of that wait and does not need to open the file. `.priority()` ducks a soundtrack built with `.duck_under_voice()`. Effects are clips on the timeline and play during playback and seeking. `oxframe render` mixes them with the soundtrack before ffmpeg encodes; `--no-audio` drops both, and `--range` keeps only the part inside the range. Dragging the waveform changes the soundtrack offset in `meta.json`.
 
+## Voice
+
+```rust
+let line = voice("Сначала нарисуем квадрат, а потом повернём его").start();
+line.at_word("квадрат").await;          // waits until that word
+square.draw_on().await;
+line.await;                             // waits until the line ends
+```
+
+`voice("one two").start()` speaks now and returns a handle. `.at_word()` matches the word with surrounding punctuation stripped and panics if it is missing, listing the words. Awaiting the line waits until the end. A line is `.priority()`, so it ducks a soundtrack built with `.duck_under_voice()`. Await the line: one that runs past the scene is an error from `oxframe check`, and two overlapping lines are a warning.
+
+`Project::tts(provider)` supplies audio and word times through a `TtsProvider`. The provider reads its own API key. A missing key or a failed call falls back to a speech-rate estimate (2.5 words per second, at least 0.3s) and the scene still runs. Each line is cached under `tts/` next to the scene. Commit that folder so CI renders the real audio without a key. An estimate is not cached. With no provider, a committed cache is still found by the line text. The playground always estimates.
+
+`oxframe render --subtitles out.srt` writes the lines. A path ending in `.vtt` writes WebVTT. `--no-audio` still writes them, and `--range` shifts the cues.
+
 ## Transitions
 
 At the start of any scene except the first:

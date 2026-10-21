@@ -1,0 +1,7 @@
+category = "voice"
+prompt = """A short scene with one spoken line, voice(\"hello there\").await, and a note in a comment that oxframe render --subtitles out.srt writes that line. No provider."""
+requires = "voice"
+
+[expect]
+uses = ["voice", "await"]
+min_seconds = 0.3

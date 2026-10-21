@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.10.0 — 2026-10-21
+
+- Creates projects on oxframe 0.10.0.
+- The agent cheat sheet covers `voice("one two").start()`, `.at_word()`,
+  `Project::tts`, `TtsProvider` and `oxframe render --subtitles out.srt`.
+
 ## 0.9.0 — 2026-10-21
 
 - Creates projects on oxframe 0.9.0.
