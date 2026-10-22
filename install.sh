@@ -14,7 +14,12 @@ case "$os-$arch" in
   *) echo "unsupported platform $os-$arch; use: cargo install oxframe-cli" >&2; exit 1 ;;
 esac
 if [ -n "${OXFRAME_VERSION:-}" ]; then tag=$OXFRAME_VERSION; else
-  tag=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" | sed -n 's/.*"tag_name": "\(.*\)".*/\1/p')
+  # The latest release from the redirect of github.com/…/releases/latest,
+  # not the API: unauthenticated API calls from CI runners hit a rate limit.
+  url=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$repo/releases/latest")
+  tag=${url##*/tag/}
+  [ "$tag" != "$url" ] && [ -n "$tag" ] ||
+    { echo "could not find the latest release ($url); set OXFRAME_VERSION" >&2; exit 1; }
 fi
 name="oxframe-$tag-$target"
 base="https://github.com/$repo/releases/download/$tag"
