@@ -4,6 +4,11 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.2 — 2026-10-22
+
+- Creates projects on oxframe 0.20.2: long text wraps inside title and end
+  cards, and centered text stays inside its box.
+
 ## 0.20.1 — 2026-10-22
 
 - `oxframe mcp` can be listed in the official MCP Registry: `server.json`
