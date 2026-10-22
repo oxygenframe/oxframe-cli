@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.3 — 2026-10-22
+
+- Creates projects on oxframe 0.20.3: `oxframe check` no longer reports
+  text in nested layouts, text written on word by word or a moving sea as
+  mistakes.
+
 ## 0.20.2 — 2026-10-22
 
 - Creates projects on oxframe 0.20.2: long text wraps inside title and end
