@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.1 — 2026-10-22
+
+- `oxframe mcp` can be listed in the official MCP Registry: `server.json`
+  and the `mcp-name:` line in this README.
+- Creates projects on oxframe 0.20.1.
+
 ## 0.20.0 — 2026-10-21
 
 - `oxframe render --jobs 4` passes the number of parallel segments to the
