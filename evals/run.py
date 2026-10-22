@@ -145,6 +145,25 @@ def scene_sources(project: Path) -> str:
     return "\n".join(p.read_text() for p in (project / "src").rglob("*.rs"))
 
 
+def has_aspect_size(src: str, aspect: str) -> bool:
+    """True if the scene sets explicit pixel dimensions matching the aspect,
+    e.g. `.size(1080, 1920)` for 9:16. The aspect APIs (Aspect::Portrait,
+    --aspect 9:16) are already caught by ASPECT_HINTS; this also accepts a raw
+    size, so an agent that writes a vertical video by its dimensions counts."""
+    orient = {"16:9": "landscape", "9:16": "portrait", "1:1": "square"}.get(aspect)
+    if not orient:
+        return False
+    for ws, hs in re.findall(r"\.size\(\s*(\d+)\s*,\s*(\d+)\s*\)", src):
+        w, h = int(ws), int(hs)
+        if (
+            (orient == "landscape" and w > h)
+            or (orient == "portrait" and h > w)
+            or (orient == "square" and w == h)
+        ):
+            return True
+    return False
+
+
 def evaluate(prompt: Prompt, project: Path, args, res: Result) -> None:
     env = dict(os.environ, CARGO_TERM_COLOR="never")
     check = sh([args.oxframe, "--json", "check"], project, args.timeout, env)
@@ -169,7 +188,9 @@ def evaluate(prompt: Prompt, project: Path, args, res: Result) -> None:
         if not re.search(rf"\b{re.escape(name)}\b", src):
             res.expectations_failed.append(f"does not use {name}")
     for aspect in exp.get("aspects", []):
-        if not re.search(ASPECT_HINTS.get(aspect, re.escape(aspect)), src):
+        if not re.search(ASPECT_HINTS.get(aspect, re.escape(aspect)), src) and not has_aspect_size(
+            src, aspect
+        ):
             res.expectations_failed.append(f"no {aspect} format")
     if "min_seconds" in exp and (res.seconds_of_video or 0) < exp["min_seconds"]:
         res.expectations_failed.append(
@@ -192,6 +213,11 @@ def run_one(prompt: Prompt, args, workdir: Path) -> Result:
         res.agent_error = f"oxframe init failed: {r.stderr.strip()[-400:]}"
         return res
     res.project = str(project)
+    # Seed shared fixtures (assets/demo.mp4, click.wav, …) that prompts refer to;
+    # a fresh `oxframe init` has none, so a video or sound prompt cannot run.
+    assets = Path(__file__).resolve().parent / "assets"
+    if assets.is_dir():
+        shutil.copytree(assets, project / "assets", dirs_exist_ok=True)
     started = time.monotonic()
     try:
         for k, v in run_agent(args.agent, prompt, project, args).items():
