@@ -1,7 +1,7 @@
 [package]
 name = "oxframe-cli"
 description = "The `oxframe` command: create, preview with hot reload, render and check oxframe projects"
-version = "0.20.3"
+version = "0.20.4"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 # Path for local development across sibling repos; the version is what
 # crates.io uses.
-oxframe-protocol = { path = "../oxframe-sdk/crates/oxframe-protocol", version = "0.20.3" }
+oxframe-protocol = { path = "../oxframe-sdk/crates/oxframe-protocol", version = "0.20.4" }
 anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
 serde = { version = "1", features = ["derive"] }

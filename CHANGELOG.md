@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.4 — 2026-10-22
+
+- `oxframe dev`: after a rebuild while the video plays, the picture and the
+  sound go on together from the same frame (the editor started the sound
+  from the beginning over a still picture). Editor 0.1.6.
+- `install.sh` finds the latest release without the GitHub API, which CI
+  runners hit the rate limit of.
+
 ## 0.20.3 — 2026-10-22
 
 - Creates projects on oxframe 0.20.3: `oxframe check` no longer reports

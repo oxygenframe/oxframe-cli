@@ -1,7 +1,7 @@
 # Version of the editor-ui bundle embedded into the CLI.
 # `just fetch-ui` downloads it from the oxframe-web GitHub release into ui/dist/.
 # For local development across repos, `just build-ui` builds it from ../oxframe-web.
-version = "0.1.4"
+version = "0.1.6"
 protocol_version = 1
-url = "https://github.com/oxygenframe/oxframe-web/releases/download/v0.1.4/editor-ui-0.1.4.tar.gz"
-sha256 = "9b1b6975a316b1be986d5e605abb3e593e49c2435749abb8edff3cf2b3d4ad3a"
+url = "https://github.com/oxygenframe/oxframe-web/releases/download/v0.1.6/editor-ui-0.1.6.tar.gz"
+sha256 = "2c38ad13bd32dc65bdc912cddee05f960b0a079ece2743c7ef629d866b12b182"
