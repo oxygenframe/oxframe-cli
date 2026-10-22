@@ -4,6 +4,10 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.20.5 — 2026-10-22
+
+- Creates projects on oxframe 0.20.5 (a new example, no API changes).
+
 ## 0.20.4 — 2026-10-22
 
 - `oxframe dev`: after a rebuild while the video plays, the picture and the
