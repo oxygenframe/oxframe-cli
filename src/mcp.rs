@@ -65,7 +65,8 @@ fn tools() -> Vec<Value> {
             json!({
                 "type": "object",
                 "properties": {
-                    "frames": { "type": "boolean", "description": "Also write every sampled frame as its own PNG." }
+                    "frames": { "type": "boolean", "description": "Also write every sampled frame as its own PNG." },
+                    "against": { "type": "string", "description": "An earlier check output made with frames (e.g. out/before): list the frames that changed and write diff images." }
                 }
             }),
         ),
@@ -155,9 +156,13 @@ fn tool(name: &str, description: &str, schema: Value) -> Value {
 
 fn call_tool(name: &str, args: &Value) -> (String, bool) {
     match name {
-        "check" => text_of(check::run(args["frames"].as_bool().unwrap_or(false), true)),
+        "check" => text_of(check::run(
+            args["frames"].as_bool().unwrap_or(false),
+            args["against"].as_str().map(std::path::PathBuf::from),
+            true,
+        )),
         "storyboard" => {
-            let done = check::run(false, true);
+            let done = check::run(false, None, true);
             let summary = storyboard_summary(&done.body);
             let mut body = done.body.clone();
             if let Some(obj) = body.as_object_mut() {

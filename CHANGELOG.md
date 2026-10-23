@@ -6,6 +6,9 @@ same version (see the SDK's
 
 ## Unreleased
 
+- `oxframe check --against <dir>` (and the `against` argument of the MCP
+  `check` tool): compare with an earlier `oxframe check --frames --out <dir>`
+  and list the frames that changed, with diff pictures.
 - `oxframe add`: ready-made blocks copied into `src/blocks/` — `logo-reveal`,
   `stat-counter`, `progress-bar`, `quote-card`, `before-after`, `timeline`.
   Each is one `async fn` call that plays itself in, and each passes `oxframe
