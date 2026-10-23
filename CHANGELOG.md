@@ -4,8 +4,10 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.22.0 — 2026-10-23
 
+- Creates projects on oxframe 0.22.0: `oxframe check` compares with an
+  earlier check, lists what moves and when, and shows both sides of hard cuts.
 - `oxframe check --against <dir>` (and the `against` argument of the MCP
   `check` tool): compare with an earlier `oxframe check --frames --out <dir>`
   and list the frames that changed, with diff pictures.
