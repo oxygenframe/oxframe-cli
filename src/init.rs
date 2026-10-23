@@ -11,6 +11,7 @@ const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
 const EXPLAINER_MAIN_RS: &str = include_str!("../templates/explainer/src/main.rs");
 const SHORT_MAIN_RS: &str = include_str!("../templates/short/src/main.rs");
+const CHART_MAIN_RS: &str = include_str!("../templates/chart/src/main.rs");
 
 const NODE_CARGO_TOML: &str = include_str!("../templates/node/Cargo.toml.tmpl");
 const NODE_LIB_RS: &str = include_str!("../templates/node/src/lib.rs");
@@ -30,6 +31,8 @@ pub enum Template {
     Explainer,
     /// A vertical 9:16 short for social, built from components.
     Short,
+    /// A chart explainer: a function on axes with a dot that rides the curve.
+    Chart,
 }
 
 /// SDK version this CLI is made for (pinned in generated projects).
@@ -96,6 +99,11 @@ pub fn generate_short(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::i
     generate_scene(dir, name, sdk_path, SHORT_MAIN_RS, "short")
 }
 
+/// A chart explainer: a function on axes.
+pub fn generate_chart(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    generate_scene(dir, name, sdk_path, CHART_MAIN_RS, "chart")
+}
+
 /// Writes a one-scene video project; `main_rs` is the scene template and
 /// `scene` names its meta file (`src/<scene>.meta.json`).
 fn generate_scene(
@@ -138,6 +146,7 @@ pub fn run(name: &str, template: Template, sdk_path: Option<&Path>) -> u8 {
         Template::Node => generate_node(dir, name, sdk_path),
         Template::Explainer => generate_explainer(dir, name, sdk_path),
         Template::Short => generate_short(dir, name, sdk_path),
+        Template::Chart => generate_chart(dir, name, sdk_path),
     };
     if let Err(e) = made {
         crate::error(format!("cannot create project: {e}"));
