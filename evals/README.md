@@ -9,6 +9,7 @@ python3 evals/run.py                         # all prompts with Claude Code
 python3 evals/run.py --only chart_pie        # some of them
 python3 evals/run.py --agent none            # no agent: checks the pipeline, costs nothing
 python3 evals/run.py --sdk-path ../oxframe-sdk   # projects on an unreleased SDK
+python3 evals/turns.py evals/results/<run>/      # where the turns went, from the saved sessions
 ```
 
 For each prompt the runner creates a project with `oxframe init`, gives the

@@ -111,7 +111,8 @@ def run_agent(agent: str, prompt: Prompt, project: Path, args) -> dict:
     if agent == "claude":
         cmd = [
             "claude", "-p", prompt.prompt,
-            "--output-format", "json",
+            # Every message, so the turns can be read afterwards (turns.py).
+            "--output-format", "stream-json", "--verbose",
             "--permission-mode", "acceptEdits",
             "--allowedTools", "Bash(oxframe:*) Bash(cargo:*) Read Edit Write Glob Grep",
             "--max-budget-usd", str(args.budget),
@@ -129,7 +130,14 @@ def run_agent(agent: str, prompt: Prompt, project: Path, args) -> dict:
         raise RuntimeError((r.stderr or r.stdout).strip()[-800:])
     if agent != "claude":
         return {}
-    out = json.loads(r.stdout)
+    if args.transcripts:
+        args.transcripts.mkdir(parents=True, exist_ok=True)
+        (args.transcripts / f"{prompt.id}.jsonl").write_text(r.stdout)
+    # The last event is the result, the same object --output-format json gives.
+    out = next(
+        e for e in (json.loads(l) for l in reversed(r.stdout.splitlines()) if l.strip())
+        if e.get("type") == "result"
+    )
     usage = out.get("usage", {})
     return {
         "turns": out.get("num_turns"),
@@ -321,11 +329,19 @@ def main() -> int:
     ap.add_argument("--sdk-path", help="build the projects against a local oxframe-sdk checkout")
     ap.add_argument("--oxframe", default=shutil.which("oxframe") or "oxframe", help="the oxframe CLI to test")
     ap.add_argument("--keep", action="store_true", help="keep the generated projects")
+    ap.add_argument(
+        "--transcripts",
+        type=Path,
+        help="where to save each agent session (default: results/<version>-<time>/)",
+    )
     args = ap.parse_args()
 
     prompts = load_prompts(set(args.only.split(",")) if args.only else None)
     version = oxframe_version(args.oxframe)
     workdir = Path(tempfile.mkdtemp(prefix="oxframe-evals-"))
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if args.transcripts is None and args.agent == "claude":
+        args.transcripts = RESULTS / f"{version}-{stamp}"
     # One shared target directory: dependencies compile once for all prompts.
     os.environ.setdefault("CARGO_TARGET_DIR", str(workdir / "target"))
     print(f"oxframe {version}, agent {args.agent}, {len(prompts)} prompt(s), projects in {workdir}")
@@ -341,7 +357,6 @@ def main() -> int:
     results.sort(key=lambda r: r.id)
 
     RESULTS.mkdir(exist_ok=True)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     path = RESULTS / f"{version}-{stamp}.json"
     data = {
         "oxframe": version,
