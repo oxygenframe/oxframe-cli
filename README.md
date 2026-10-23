@@ -6,7 +6,9 @@ The `oxframe` command for [oxframe](https://github.com/oxygenframe/oxframe-sdk)
 projects: create, preview with hot reload, render, check.
 
 ```sh
-cargo install oxframe-cli          # or: curl -fsSL …/install.sh | sh
+cargo install oxframe-cli          # or a prebuilt binary:
+#   Linux, macOS:  curl -fsSL https://github.com/oxygenframe/oxframe-cli/releases/latest/download/install.sh | sh
+#   Windows:       powershell -ExecutionPolicy Bypass -c "irm https://github.com/oxygenframe/oxframe-cli/releases/latest/download/install.ps1 | iex"
 oxframe init hello && cd hello
 oxframe dev --open                 # editor on http://127.0.0.1:3000/?token=…
 oxframe render                     # out/hello.mp4

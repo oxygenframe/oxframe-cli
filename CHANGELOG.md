@@ -9,6 +9,9 @@ same version (see the SDK's
 - `cargo binstall oxframe-cli` downloads the prebuilt binary from the
   GitHub release instead of compiling (about 5 s). Linux, macOS (Intel and
   Apple Silicon) and Windows.
+- Windows gets a prebuilt installer too: `install.ps1` from the release
+  downloads the binary, checks its sha256 and adds its folder to the user
+  PATH. CI runs it in Windows PowerShell 5.1 and pwsh 7.
 - `oxframe doctor` checks what a first build and render need — Rust 1.95 or
   newer with cargo, a C linker, ffmpeg, and, inside a project, whether it is
   on the SDK this CLI makes — and prints how to fix each missing piece for
