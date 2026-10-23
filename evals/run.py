@@ -318,6 +318,23 @@ def table(results: list[Result]) -> str:
     return "\n".join("  ".join(c.ljust(w) for c, w in zip(row, widths)).rstrip() for row in rows)
 
 
+def cap_memory(limit: str) -> None:
+    """Re-run this script inside a systemd scope with MemoryMax=limit.
+
+    Parallel agents, cargo and renders can take tens of GB; without a cap the
+    whole terminal (and everything in it) is what systemd-oomd kills.
+    """
+    if limit == "none" or os.environ.get("OXFRAME_EVALS_SCOPE") == limit:
+        return
+    systemd_run = shutil.which("systemd-run")
+    if systemd_run is None:
+        print(f"systemd-run not found: running without the {limit} memory cap", file=sys.stderr)
+        return
+    env = dict(os.environ, OXFRAME_EVALS_SCOPE=limit)
+    cmd = [systemd_run, "--user", "--scope", "--quiet", "-p", f"MemoryMax={limit}", "-p", "MemorySwapMax=0"]
+    os.execvpe(cmd[0], [*cmd, sys.executable, *sys.argv], env)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--agent", default="claude", help="claude (default), none, or cmd:<command with {prompt_file}>")
@@ -334,7 +351,13 @@ def main() -> int:
         type=Path,
         help="where to save each agent session (default: results/<version>-<time>/)",
     )
+    ap.add_argument(
+        "--memory-max",
+        default="32G",
+        help="memory cap for the whole run, via a systemd scope (default 32G; 'none' to run uncapped)",
+    )
     args = ap.parse_args()
+    cap_memory(args.memory_max)
 
     prompts = load_prompts(set(args.only.split(",")) if args.only else None)
     version = oxframe_version(args.oxframe)

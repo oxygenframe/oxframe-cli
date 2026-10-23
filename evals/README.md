@@ -12,6 +12,10 @@ python3 evals/run.py --sdk-path ../oxframe-sdk   # projects on an unreleased SDK
 python3 evals/turns.py evals/results/<run>/      # where the turns went, from the saved sessions
 ```
 
+The run re-executes itself in a systemd user scope capped at
+`--memory-max` (default `32G`, no swap), so running out of memory kills the
+eval, not your terminal. `--memory-max none` turns the cap off.
+
 For each prompt the runner creates a project with `oxframe init`, gives the
 prompt to the agent (Claude Code by default: `claude -p`, edits allowed,
 `--max-budget-usd 2` per prompt) and then measures:
