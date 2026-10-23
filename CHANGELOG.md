@@ -10,6 +10,9 @@ same version (see the SDK's
   ffmpeg, with the SDK already compiled, so a project's first `oxframe
   check` or `oxframe render` in CI takes seconds, not minutes. Published
   with each release.
+- The prebuilt Linux binaries (install.sh, cargo binstall) run on Debian 12,
+  Ubuntu 22.04 and other systems with glibc 2.34 or newer. 0.21.0's were
+  built on Ubuntu 24.04 and stopped with `GLIBC_2.39 not found` there.
 - `cargo binstall oxframe-cli` downloads the prebuilt binary from the
   GitHub release instead of compiling (about 5 s). Linux, macOS (Intel and
   Apple Silicon) and Windows.
