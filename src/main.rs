@@ -117,6 +117,9 @@ enum Cmd {
         /// Render on the CPU (tiny-skia), e.g. in CI without a GPU.
         #[arg(long)]
         cpu: bool,
+        /// Render on the GPU (vello) instead of the default CPU renderer.
+        #[arg(long)]
+        gpu: bool,
         #[arg(long)]
         no_audio: bool,
         /// Also write the spoken lines as .srt or .vtt (by extension).
@@ -245,6 +248,7 @@ fn main() -> ExitCode {
             size,
             aspect,
             cpu,
+            gpu,
             no_audio,
             subtitles,
             slides,
@@ -257,6 +261,7 @@ fn main() -> ExitCode {
             size,
             aspect,
             cpu,
+            gpu,
             no_audio,
             subtitles,
             slides,

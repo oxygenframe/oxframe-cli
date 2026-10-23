@@ -137,7 +137,8 @@ fn tools() -> Vec<Value> {
                     "aspect": { "type": "string", "description": "16:9, 9:16, 1:1 or all." },
                     "format": { "type": "string" },
                     "size": { "type": "string" },
-                    "cpu": { "type": "boolean" }
+                    "cpu": { "type": "boolean" },
+                    "gpu": { "type": "boolean" }
                 }
             }),
         ),
@@ -214,6 +215,7 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             size: arg_string(args, "size"),
             aspect: arg_string(args, "aspect"),
             cpu: args["cpu"].as_bool().unwrap_or(false),
+            gpu: args["gpu"].as_bool().unwrap_or(false),
             no_audio: false,
             subtitles: None,
             slides: None,

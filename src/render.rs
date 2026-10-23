@@ -16,6 +16,7 @@ pub struct RenderArgs {
     /// `16:9`, `9:16`, `1:1`, or `all`.
     pub aspect: Option<String>,
     pub cpu: bool,
+    pub gpu: bool,
     pub no_audio: bool,
     /// Spoken lines as .srt or .vtt.
     pub subtitles: Option<std::path::PathBuf>,
@@ -102,6 +103,9 @@ pub fn run(a: RenderArgs) -> Done {
     }
     if a.cpu {
         cmd.arg("--cpu");
+    }
+    if a.gpu {
+        cmd.arg("--gpu");
     }
     if a.no_audio {
         cmd.arg("--no-audio");
