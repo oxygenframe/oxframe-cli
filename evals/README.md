@@ -19,7 +19,7 @@ prompt to the agent (Claude Code by default: `claude -p`, edits allowed,
 |---|---|
 | **build** | the project compiles (`oxframe check` wrote a report) |
 | **check err** | errors from `oxframe check` (visual lint) |
-| **expectations** | what the prompt asked for: `uses` (e.g. `Camera`), `aspects` (`9:16`), `min_seconds` |
+| **expectations** | what the prompt asked for: `uses` (e.g. `Camera`; `Particles|Custom` accepts either), `aspects` (`9:16`), `min_seconds` |
 | **ok** | built, no check errors, expectations met |
 | **turns, min, tokens, $** | what it took (from the agent's own report) |
 

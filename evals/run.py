@@ -184,9 +184,10 @@ def evaluate(prompt: Prompt, project: Path, args, res: Result) -> None:
 
     src = scene_sources(project)
     exp = prompt.expect
+    # "A|B" accepts either: the docs offer more than one way for some effects.
     for name in exp.get("uses", []):
-        if not re.search(rf"\b{re.escape(name)}\b", src):
-            res.expectations_failed.append(f"does not use {name}")
+        if not any(re.search(rf"\b{re.escape(n)}\b", src) for n in name.split("|")):
+            res.expectations_failed.append(f"does not use {name.replace('|', ' or ')}")
     for aspect in exp.get("aspects", []):
         if not re.search(ASPECT_HINTS.get(aspect, re.escape(aspect)), src) and not has_aspect_size(
             src, aspect
@@ -259,11 +260,14 @@ def summary(results: list[Result]) -> dict:
     }
 
 
-def previous(agent: str, current: Path) -> dict | None:
+def previous(agent: str, current: Path, ids: set[str]) -> dict | None:
+    """The latest earlier run of the same agent on the same prompts: an
+    --only run or a partial one is no baseline for a full run, or the other
+    way round."""
     runs = sorted(p for p in RESULTS.glob("*.json") if p != current)
     for p in reversed(runs):
         data = json.loads(p.read_text())
-        if data.get("agent") == agent:
+        if data.get("agent") == agent and {r["id"] for r in data["results"]} == ids:
             return data
     return None
 
@@ -355,7 +359,9 @@ def main() -> int:
         f"builds {s['build_rate']:.0%}, turns {s['mean_turns']}, "
         f"{s['mean_minutes']} min, ${s['total_cost_usd']} → {path.relative_to(HERE.parent)}"
     )
-    before = previous(args.agent, path)
+    before = previous(args.agent, path, {r["id"] for r in data["results"]})
+    if before is None:
+        print("no earlier run of the same prompts with this agent to compare with")
     worse = regressions(data, before) if before else []
     for w in worse:
         print(f"regression vs {before['oxframe']} ({before['date']}): {w}")

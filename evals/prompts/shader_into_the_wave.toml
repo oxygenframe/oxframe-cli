@@ -3,5 +3,6 @@ prompt = """A short ocean piece in two scenes. Scene one: the sea fills the bott
 requires = "shaders"
 
 [expect]
-uses = ["Camera", "waves", "Particles", "lens_drops", "water_wipe", "wait_until"]
+# Spray: the cheat sheet offers Particles or Custom with ctx.rng(seed).
+uses = ["Camera", "waves", "Particles|Custom", "lens_drops", "water_wipe", "wait_until"]
 min_seconds = 4
