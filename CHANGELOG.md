@@ -4,6 +4,19 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.21.0 — 2026-10-23
+
+- Creates projects on oxframe 0.21.0: the CPU draws frames by default
+  (`--gpu` opts into vello), `oxframe check` writes a close-up crop for each
+  issue on a node, and `Math` formulas come with the `math` feature.
+- `oxframe render`, `oxframe dev` and `oxframe present` take `--gpu`;
+  `--cpu` still works and wins.
+- `oxframe init --template explainer|short|chart`: a scene built from
+  components, a vertical 9:16 short, and a function plotted on axes. Each
+  compiles and passes `oxframe check` with no errors.
+- The project skill and AGENTS.md: a Recipes section (code explanation goes
+  to the `Code` node), the check crops, and the `Math` node.
+
 ## 0.20.5 — 2026-10-22
 
 - Creates projects on oxframe 0.20.5 (a new example, no API changes).
