@@ -9,6 +9,7 @@ mod cargo;
 mod check;
 mod config;
 mod dev;
+mod doctor;
 mod hints;
 mod init;
 mod mcp;
@@ -172,6 +173,9 @@ enum Cmd {
     /// Move the project to the SDK version this CLI is made for, then refresh
     /// Cargo.lock and the AI agent files.
     Upgrade,
+    /// Check what building and rendering need (Rust, a C linker, ffmpeg, the
+    /// project's SDK version) and say how to fix what is missing.
+    Doctor,
     /// Write or refresh instructions for AI coding agents (AGENTS.md, .claude/skills/oxframe).
     Agents {
         /// Replace files you edited yourself.
@@ -288,6 +292,7 @@ fn main() -> ExitCode {
             let code = agents::run(force);
             reply::done(cli.json, code, serde_json::json!({"command": "agents"}))
         }
+        Cmd::Doctor => doctor::run(cli.json),
         Cmd::Upgrade => {
             let code = upgrade::run();
             reply::done(cli.json, code, serde_json::json!({"command": "upgrade"}))

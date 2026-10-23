@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## Unreleased
+
+- `oxframe doctor` checks what a first build and render need — Rust 1.95 or
+  newer with cargo, a C linker, ffmpeg, and, inside a project, whether it is
+  on the SDK this CLI makes — and prints how to fix each missing piece for
+  the system it runs on. A missing requirement exits 2; no ffmpeg or a
+  project on another SDK is a warning. `--json` gives the checks as a list.
+
 ## 0.21.0 — 2026-10-23
 
 - Creates projects on oxframe 0.21.0: the CPU draws frames by default

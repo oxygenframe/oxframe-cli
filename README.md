@@ -15,6 +15,7 @@ oxframe inspect --at 2.5           # scene tree at that time, as JSON (--graph a
 oxframe snapshot --at 1.5          # one frame as PNG in out/snapshots/
 oxframe agents                     # refresh AGENTS.md and the Claude Code skill
 oxframe upgrade                    # move the project to this CLI's SDK version
+oxframe doctor                     # Rust, a C linker, ffmpeg: what is missing and how to fix it
 ```
 
 ## Updating
