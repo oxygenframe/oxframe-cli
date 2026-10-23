@@ -1,6 +1,6 @@
 //! `oxframe check`: cargo check, meta validation, version agreement, visual lint.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use oxframe_protocol::{Meta, PROTOCOL_VERSION};
@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use crate::reply::Done;
 use crate::{cargo, config, exit, render, ui};
 
-pub fn run(frames: bool, json: bool) -> Done {
+pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
         Err(e) => return crate::reply::fail(json, exit::ENV, e),
@@ -196,6 +196,11 @@ pub fn run(frames: bool, json: bool) -> Done {
     ]);
     if frames {
         cmd.arg("--frames");
+    }
+    // The project binary runs in the project root; the path is the user's.
+    if let Some(dir) = against {
+        let dir = std::env::current_dir().map_or(dir.clone(), |cwd| cwd.join(&dir));
+        cmd.arg("--against").arg(dir);
     }
     cmd.args(cfg.theme.args());
     let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, json) {

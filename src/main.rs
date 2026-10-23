@@ -141,6 +141,10 @@ enum Cmd {
         /// Also write each storyboard frame at full size under out/check/frames/.
         #[arg(long)]
         frames: bool,
+        /// Compare the frames with an earlier `oxframe check --frames --out <dir>`:
+        /// lists the frames that changed and writes out/check/diff/.
+        #[arg(long, value_name = "DIR")]
+        against: Option<PathBuf>,
     },
     /// Print the scene tree at a time as JSON (kind, name, bounds, text).
     Inspect {
@@ -282,7 +286,7 @@ fn main() -> ExitCode {
             jobs,
             json: cli.json,
         }),
-        Cmd::Check { frames } => check::run(frames, cli.json),
+        Cmd::Check { frames, against } => check::run(frames, against, cli.json),
         Cmd::Inspect { at, scene, graph } => check::inspect(at, scene, graph, cli.json),
         Cmd::Snapshot {
             at,
