@@ -9,6 +9,9 @@ const MAIN_RS: &str = include_str!("../templates/default/src/main.rs");
 const META: &str = include_str!("../templates/default/src/intro.meta.json");
 const OXFRAME_TOML: &str = include_str!("../templates/default/oxframe.toml");
 const GITIGNORE: &str = include_str!("../templates/default/gitignore");
+const EXPLAINER_MAIN_RS: &str = include_str!("../templates/explainer/src/main.rs");
+const SHORT_MAIN_RS: &str = include_str!("../templates/short/src/main.rs");
+const CHART_MAIN_RS: &str = include_str!("../templates/chart/src/main.rs");
 
 const NODE_CARGO_TOML: &str = include_str!("../templates/node/Cargo.toml.tmpl");
 const NODE_LIB_RS: &str = include_str!("../templates/node/src/lib.rs");
@@ -24,6 +27,12 @@ pub enum Template {
     Default,
     /// A library crate with a node of your own, a demo scene and a test.
     Node,
+    /// A video project built from components: a title, a bullet list and an end card.
+    Explainer,
+    /// A vertical 9:16 short for social, built from components.
+    Short,
+    /// A chart explainer: a function on axes with a dot that rides the curve.
+    Chart,
 }
 
 /// SDK version this CLI is made for (pinned in generated projects).
@@ -76,6 +85,34 @@ pub fn generate_node(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io
 }
 
 pub fn generate(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    generate_scene(dir, name, sdk_path, MAIN_RS, "intro")
+}
+
+/// An explainer video project: the same layout as the default, with a scene
+/// built from the components (TitleCard, BulletList, EndCard).
+pub fn generate_explainer(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    generate_scene(dir, name, sdk_path, EXPLAINER_MAIN_RS, "explainer")
+}
+
+/// A vertical 9:16 short, built from the components.
+pub fn generate_short(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    generate_scene(dir, name, sdk_path, SHORT_MAIN_RS, "short")
+}
+
+/// A chart explainer: a function on axes.
+pub fn generate_chart(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Result<()> {
+    generate_scene(dir, name, sdk_path, CHART_MAIN_RS, "chart")
+}
+
+/// Writes a one-scene video project; `main_rs` is the scene template and
+/// `scene` names its meta file (`src/<scene>.meta.json`).
+fn generate_scene(
+    dir: &Path,
+    name: &str,
+    sdk_path: Option<&Path>,
+    main_rs: &str,
+    scene: &str,
+) -> std::io::Result<()> {
     let fill = |t: &str| {
         t.replace("{{name}}", name)
             .replace("{{oxframe_dep}}", &oxframe_dependency(sdk_path))
@@ -83,8 +120,8 @@ pub fn generate(dir: &Path, name: &str, sdk_path: Option<&Path>) -> std::io::Res
     std::fs::create_dir_all(dir.join("src"))?;
     std::fs::create_dir_all(dir.join("assets"))?;
     std::fs::write(dir.join("Cargo.toml"), fill(CARGO_TOML))?;
-    std::fs::write(dir.join("src/main.rs"), fill(MAIN_RS))?;
-    std::fs::write(dir.join("src/intro.meta.json"), META)?;
+    std::fs::write(dir.join("src/main.rs"), fill(main_rs))?;
+    std::fs::write(dir.join(format!("src/{scene}.meta.json")), META)?;
     std::fs::write(dir.join("oxframe.toml"), OXFRAME_TOML)?;
     std::fs::write(dir.join(".gitignore"), GITIGNORE)?;
     std::fs::write(dir.join("assets/.gitkeep"), "")?;
@@ -107,6 +144,9 @@ pub fn run(name: &str, template: Template, sdk_path: Option<&Path>) -> u8 {
     let made = match template {
         Template::Default => generate(dir, name, sdk_path),
         Template::Node => generate_node(dir, name, sdk_path),
+        Template::Explainer => generate_explainer(dir, name, sdk_path),
+        Template::Short => generate_short(dir, name, sdk_path),
+        Template::Chart => generate_chart(dir, name, sdk_path),
     };
     if let Err(e) = made {
         crate::error(format!("cannot create project: {e}"));
