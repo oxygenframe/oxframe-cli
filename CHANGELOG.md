@@ -6,6 +6,11 @@ same version (see the SDK's
 
 ## Unreleased
 
+- `oxframe add`: ready-made blocks copied into `src/blocks/` — `logo-reveal`,
+  `stat-counter`, `progress-bar`, `quote-card`, `before-after`, `timeline`.
+  Each is one `async fn` call that plays itself in, and each passes `oxframe
+  check`. With no name it lists them; `--json` for agents. The agent files
+  describe them.
 - A container image, `ghcr.io/oxygenframe/oxframe`: the CLI, Rust and
   ffmpeg, with the SDK already compiled, so a project's first `oxframe
   check` or `oxframe render` in CI takes seconds, not minutes. Published

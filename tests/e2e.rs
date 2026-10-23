@@ -289,3 +289,61 @@ async fn init_dev_reload_render() {
     assert!(std::fs::metadata(&out).unwrap().len() > 1000);
     eprintln!("hot reload took {reload:?} (target ≤ 3 s)");
 }
+
+/// Every block from `oxframe add` compiles in a fresh project and a scene
+/// that calls all of them passes `oxframe check` with no issue.
+#[test]
+#[ignore = "slow: builds a project"]
+fn every_block_adds_and_checks_clean() {
+    let tmp = tempfile::tempdir().unwrap();
+    let st = oxframe()
+        .current_dir(tmp.path())
+        .args(["init", "blocks"])
+        .arg("--sdk-path")
+        .arg(sdk_path())
+        .status()
+        .unwrap();
+    assert!(st.success());
+    let dir = tmp.path().join("blocks");
+    let list = oxframe()
+        .current_dir(&dir)
+        .args(["--json", "add"])
+        .output()
+        .unwrap();
+    let catalog: serde_json::Value = serde_json::from_slice(&list.stdout).unwrap();
+    let names: Vec<String> = catalog["blocks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|b| b["name"].as_str().unwrap().to_owned())
+        .collect();
+    assert!(names.len() >= 6, "{names:?}");
+    for name in &names {
+        let st = oxframe()
+            .current_dir(&dir)
+            .args(["add", name])
+            .status()
+            .unwrap();
+        assert!(st.success(), "oxframe add {name}");
+    }
+    // The tour calls every block in turn.
+    std::fs::write(
+        dir.join("src/main.rs"),
+        include_str!("fixtures/blocks_tour.rs"),
+    )
+    .unwrap();
+    let out = oxframe()
+        .current_dir(&dir)
+        .args(["--json", "check"])
+        .output()
+        .unwrap();
+    let reply: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap_or_default();
+    assert!(
+        out.status.success(),
+        "check failed: {}\n{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let issues = reply["report"]["issues"].as_array().map_or(0, Vec::len);
+    assert_eq!(issues, 0, "{}", reply["report"]);
+}

@@ -4,6 +4,7 @@
 //! its binary (`preview`/`render`/`info` commands provided by the SDK),
 //! watches files, restarts the process and serves the editor UI.
 
+mod add;
 mod agents;
 mod cargo;
 mod check;
@@ -173,6 +174,15 @@ enum Cmd {
     /// Move the project to the SDK version this CLI is made for, then refresh
     /// Cargo.lock and the AI agent files.
     Upgrade,
+    /// Add a ready-made block to the project (`src/blocks/`); with no name,
+    /// list them.
+    Add {
+        /// Block name, e.g. `stat-counter`.
+        block: Option<String>,
+        /// Replace the block's file if it exists.
+        #[arg(long)]
+        force: bool,
+    },
     /// Check what building and rendering need (Rust, a C linker, ffmpeg, the
     /// project's SDK version) and say how to fix what is missing.
     Doctor,
@@ -293,6 +303,7 @@ fn main() -> ExitCode {
             reply::done(cli.json, code, serde_json::json!({"command": "agents"}))
         }
         Cmd::Doctor => doctor::run(cli.json),
+        Cmd::Add { block, force } => add::run(block, force, cli.json),
         Cmd::Upgrade => {
             let code = upgrade::run();
             reply::done(cli.json, code, serde_json::json!({"command": "upgrade"}))
