@@ -171,3 +171,8 @@ Make an event (a splash, a swell) a signal change at that moment, such as `lens.
 - *"`()` is not an animation"*: a closure ending in `;` returns nothing. Drop the `;` (`|r| r.fade_in()`), or return `async move { a.await; b.await; }` for several steps.
 - `Signal::new(0.0)` ambiguous float: write `0.0f64`.
 - `all` of a few different animations takes a **tuple** — note the double parentheses: `all((a, b))`.
+- A builder sets, a handle animates. `Rect::new().stroke(Accent)` before `view.add`; after it, the same name is a signal: `r.stroke().set(Accent)`, `r.stroke().to(Danger, 0.3)`. *"takes 0 arguments but 1 argument was supplied"* or *"no method named `width` found for struct `Signal`"* means a builder call on a handle.
+- `.size(s)` takes one number: a square `Rect`, the diameter of a `Circle`. A `w × h` rectangle is `Rect::new().width(w).height(h)`, and its handle animates `width()` and `height()`; `node.size()` only reads the box as `(w, h)`.
+- `view.size()` is `(u32, u32)` pixels: `let (w, h) = view.size(); let w = w as f64;` before multiplying by a float.
+- `Txt` has no `width()`: read the laid-out box with `label.size().0`.
+- *"cannot find type `Vec3` / `View3d`"*: 3D is behind a feature: `oxframe = { ..., features = ["3d"] }` in Cargo.toml.
