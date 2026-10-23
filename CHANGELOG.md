@@ -6,6 +6,10 @@ same version (see the SDK's
 
 ## Unreleased
 
+- A container image, `ghcr.io/oxygenframe/oxframe`: the CLI, Rust and
+  ffmpeg, with the SDK already compiled, so a project's first `oxframe
+  check` or `oxframe render` in CI takes seconds, not minutes. Published
+  with each release.
 - `cargo binstall oxframe-cli` downloads the prebuilt binary from the
   GitHub release instead of compiling (about 5 s). Linux, macOS (Intel and
   Apple Silicon) and Windows.
