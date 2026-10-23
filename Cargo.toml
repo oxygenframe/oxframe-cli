@@ -18,6 +18,16 @@ include = ["src/**", "templates/**", "ui/dist/**", "ui.lock", "Cargo.toml", "REA
 name = "oxframe"
 path = "src/main.rs"
 
+# `cargo binstall oxframe-cli` downloads the release archive instead of
+# compiling: the files the release workflow uploads to GitHub.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/oxframe-v{ version }-{ target }{ archive-suffix }"
+bin-dir = "oxframe-v{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
 [dependencies]
 # Path for local development across sibling repos; the version is what
 # crates.io uses.
