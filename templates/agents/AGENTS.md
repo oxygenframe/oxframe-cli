@@ -132,7 +132,7 @@ sea.amp().to(0.12, 1.2).await;
 
 `shaders::waves()` is a node. `.amp()`, `.speed()`, `.deep()` and `.foam()` are signals. A theme role such as `Accent` follows the theme. The node is a box and has no children; put a title on the view.
 
-`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. The waves preset is painted. A custom `shade` is type-checked on every draw.
+`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. A custom `shade` runs on the CPU in `check`, `render` and `dev`, not in the playground.
 
 ```rust
 let lens = view.add(shaders::lens_drops().wetness(0.0).fullscreen()); // add it last
@@ -151,7 +151,7 @@ Pick a preset before writing WGSL:
 | A wet camera lens | `shaders::lens_drops()`, added last, `.fullscreen()` |
 | Rings on water, text or an image | `node.effect(shaders::ripple())` |
 | A scene change through water | `Transition::shader(shaders::water_wipe())` |
-| Anything else | `Custom`; your own WGSL is checked, not run |
+| Anything else | `Shader::source` with your own `shade`, or `Custom` |
 
 Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
 
