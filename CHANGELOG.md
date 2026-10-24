@@ -4,8 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.23.0 — 2026-10-24
 
+- Creates projects on oxframe 0.23.0: your own WGSL shader is painted, and
+  it can read an image, another node or the frame drawn before it.
+- The agent files know 0.23: `Signal::set` takes plain values, a custom
+  `shade` runs, `sample_<name>` reads an input, and `input_cycle` is gone.
 - `oxframe add`: six more blocks — `release-notes` (a version and its
   changes), `terminal` (a typed command and its output), `code-change` (code
   that diffs into its new version), `bar-chart`, `kinetic-title` (words pop
