@@ -134,3 +134,7 @@ jobs:
       - run: cargo publish --locked
         if: steps.published.outputs.yes != 'true'
         env: { CARGO_REGISTRY_TOKEN: "${{ secrets.CARGO_REGISTRY_TOKEN }}" }
+
+  mcp-registry:
+    needs: publish
+    uses: ./.github/workflows/publish-mcp.yml
