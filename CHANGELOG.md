@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## 0.23.1 — 2026-10-24
+
+- Creates projects on oxframe 0.23.1: your own WGSL shader paints in the
+  browser playground too.
+- The agent files say so (about 0.3 s for a 1080p frame in the browser).
+
 ## 0.23.0 — 2026-10-24
 
 - Creates projects on oxframe 0.23.0: your own WGSL shader is painted, and
