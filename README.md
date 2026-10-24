@@ -17,6 +17,7 @@ cargo install oxframe-cli          # or a prebuilt binary:
 oxframe init hello && cd hello
 oxframe dev --open                 # editor on http://127.0.0.1:3000/?token=…
 oxframe render                     # out/hello.mp4
+oxframe publish --title "Hello"    # upload to oxframe.dev, print a link with a player
 oxframe check                      # compile, then storyboard + report.json
 oxframe inspect --at 2.5           # scene tree at that time, as JSON (--graph adds passes)
 oxframe snapshot --at 1.5          # one frame as PNG in out/snapshots/

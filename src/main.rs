@@ -14,6 +14,7 @@ mod doctor;
 mod hints;
 mod init;
 mod mcp;
+mod publish;
 mod render;
 mod reply;
 mod snapshot;
@@ -135,6 +136,26 @@ enum Cmd {
         /// cores, at most 8). The file is the same for any number.
         #[arg(long)]
         jobs: Option<u32>,
+    },
+    /// Render the project (or take an MP4) and upload it to oxframe.dev: prints
+    /// a public link with a player, kept for 30 days. Up to 30 s and 16 MB.
+    Publish {
+        /// An MP4 to publish instead of rendering the project.
+        file: Option<PathBuf>,
+        #[arg(long, conflicts_with = "file")]
+        scene: Option<String>,
+        /// Seconds, e.g. 0..30
+        #[arg(long, conflicts_with = "file")]
+        range: Option<String>,
+        /// Shown on the page and in link previews.
+        #[arg(long)]
+        title: Option<String>,
+        /// Render on the CPU (tiny-skia).
+        #[arg(long, conflicts_with = "file")]
+        cpu: bool,
+        /// Render on the GPU (vello).
+        #[arg(long, conflicts_with = "file")]
+        gpu: bool,
     },
     /// Type-check, then write a storyboard and a visual-lint report to out/check/.
     Check {
@@ -284,6 +305,22 @@ fn main() -> ExitCode {
             subtitles,
             slides,
             jobs,
+            json: cli.json,
+        }),
+        Cmd::Publish {
+            file,
+            scene,
+            range,
+            title,
+            cpu,
+            gpu,
+        } => publish::run(publish::PublishArgs {
+            file,
+            scene,
+            range,
+            title,
+            cpu,
+            gpu,
             json: cli.json,
         }),
         Cmd::Check { frames, against } => check::run(frames, against, cli.json),
