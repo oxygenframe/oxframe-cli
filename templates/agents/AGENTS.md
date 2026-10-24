@@ -132,7 +132,7 @@ sea.amp().to(0.12, 1.2).await;
 
 `shaders::waves()` is a node. `.amp()`, `.speed()`, `.deep()` and `.foam()` are signals. A theme role such as `Accent` follows the theme. The node is a box and has no children; put a title on the view.
 
-`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. The waves preset is painted. A custom `shade` is type-checked on every draw.
+`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. A custom `shade` runs on the CPU in `check`, `render` and `dev`, not in the playground. `.input("photo", Input::file("photo.png"))` is read with `sample_photo(uv)`; `.input("scene", Input::frame())` with `sample_scene(i.screen / ox.resolution)`; a node added with `.offscreen()` with `.input("logo", Input::node(logo))` and `sample_logo(uv)`.
 
 ```rust
 let lens = view.add(shaders::lens_drops().wetness(0.0).fullscreen()); // add it last
@@ -151,9 +151,9 @@ Pick a preset before writing WGSL:
 | A wet camera lens | `shaders::lens_drops()`, added last, `.fullscreen()` |
 | Rings on water, text or an image | `node.effect(shaders::ripple())` |
 | A scene change through water | `Transition::shader(shaders::water_wipe())` |
-| Anything else | `Custom`; your own WGSL is checked, not run |
+| Anything else | `Shader::source` with your own `shade`, or `Custom` |
 
-Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
+Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect they read what that group drew before them, and the group then fades or blurs as a whole. In `water_wipe`, add the next scene's background before the `transition` call.
 
 ## Rules
 
@@ -171,3 +171,8 @@ Make an event (a splash, a swell) a signal change at that moment, such as `lens.
 - *"`()` is not an animation"*: a closure ending in `;` returns nothing. Drop the `;` (`|r| r.fade_in()`), or return `async move { a.await; b.await; }` for several steps.
 - `Signal::new(0.0)` ambiguous float: write `0.0f64`.
 - `all` of a few different animations takes a **tuple** — note the double parentheses: `all((a, b))`.
+- A builder sets, a handle animates. `Rect::new().stroke(Accent)` before `view.add`; after it, the same name is a signal: `r.stroke().set(Accent)`, `r.stroke().to(Danger, 0.3)`. *"takes 0 arguments but 1 argument was supplied"* or *"no method named `width` found for struct `Signal`"* means a builder call on a handle.
+- `.size(s)` takes one number: a square `Rect`, the diameter of a `Circle`. A `w × h` rectangle is `Rect::new().width(w).height(h)`, and its handle animates `width()` and `height()`; `node.size()` only reads the box as `(w, h)`.
+- `view.size()` is `(u32, u32)` pixels: `let (w, h) = view.size(); let w = w as f64;` before multiplying by a float.
+- `Txt` has no `width()`: read the laid-out box with `label.size().0`.
+- *"cannot find type `Vec3` / `View3d`"*: 3D is behind a feature: `oxframe = { ..., features = ["3d"] }` in Cargo.toml.

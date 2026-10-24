@@ -79,7 +79,7 @@ sea.amp().to(0.12, 1.2).await;
 
 `Shader::source(wgsl)` and `Shader::file(path)` take WGSL that defines `struct Params`, `@group(1) @binding(0) var<uniform> p: Params`, and `fn shade(i: ShadeIn) -> vec4<f32>`. oxframe adds `ox` (`time`, `frame`, `resolution`, `size`, `seed`, `view`, `progress`) and `ShadeIn` (`uv`, `local`, `world`, `screen`). `.uniform("name", 0.3)` sets a number; a color uses `.uniform_color`. A name or type that is not in `Params` is `param_unknown`. WGSL that does not compile is `shader_error`, with the line in your source. `Shader::file` is read on every draw, so saving the file updates the scene without a rebuild.
 
-The waves preset is rasterized and then drawn by whichever backend is running, including a check with no GPU. A custom `shade` is type-checked on every draw and is not executed yet. A shader that takes longer than the draft budget is `shader_slow`. An opaque shader painted over text is `covers_text`.
+The waves preset is rasterized and then drawn by whichever backend is running, including a check with no GPU. A custom `shade` runs on the CPU the same way (about 0.13 s for a 1080p frame in a release build); the playground does not paint it. It cannot use textures or derivatives (`shader_error`). Read an image with `.input("photo", Input::file("photo.png"))` and `sample_photo(uv)` in WGSL (straight-alpha sRGB, `uv` 0..1, clamped). With `.input("scene", Input::frame())`, `sample_scene(i.screen / ox.resolution)` reads what was drawn before the shader, and the shader is painted over it inside its box. A node added with `.offscreen()` is drawn only for a shader: `.input("logo", Input::node(logo))` and `sample_logo(uv)`, `uv` across the node's box; `check` skips it. A shader that takes longer than the draft budget is `shader_slow`. An opaque shader painted over text is `covers_text`.
 
 ### Shaders that read pixels
 
@@ -96,8 +96,8 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 - `shaders::lens_drops()`: drops over everything drawn before this node, inside its box. Add it last and make it `.fullscreen()`. `.wetness()` 0..1 is a signal (default 0.6), `.seed()` places the drops, `.drop_size()` scales them. `.input("scene", Input::frame())` names the input; another name is `param_unknown`.
 - `node.effect(shaders::ripple())` returns an `Effect`. `.strength()` (default 1) and `.speed()` (default 6) are signals. Colors move outward from the node's center, the outline stays. One effect per node; a second call replaces it.
 - `Transition::shader(shaders::water_wipe())`: a wavy waterline rises; below it is the next scene, rippled near the line. `.wave()` sets the wave height (fraction of the frame, default 0.04). Nodes the next scene adds before `transition` are under the water.
-- A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect cannot read finished pixels: `check` reports `input_cycle` (an error) and draws without it. Put the effect on the group.
-- All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes. `Input::node`, `Input::image` and `.offscreen()` do not exist yet, and a custom `shade` still is not run.
+- A shader inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect reads what that group drew before it; the group is then faded, blurred or clipped as a whole.
+- All three run on the CPU, so `check` and `render --cpu` paint them; the GPU renderer gives the same picture. `inspect --graph` lists them as `effect` passes.
 
 ## Video (feature `video`, needs ffmpeg)
 
@@ -122,7 +122,7 @@ transition(Transition::shader(shaders::water_wipe().wave(0.04))).await;
 
 ## Matrices, vectors, tables
 
-- `Matrix::new(rows)` (numbers, `&str`, anything `Display`) → handle (Clone, derefs to `Node`): `cell(r, c) -> Txt`, `row(r)`, `column(c) -> Vec<Txt>`, `rows()`, `columns()`, `brackets() -> [Path; 2]`, `row_frame(r)`, `column_frame(c)`, `cell_frame(r, c) -> Rect` (hidden; `.fade_in()` / `.opacity().to(..)`). Builder: `.font_size(px)`, `.cell_width(px)` (room for later, longer values), `.column_gap`, `.row_gap`. Change a value: `m.cell(1, 0).text().set("7".into())`.
+- `Matrix::new(rows)` (numbers, `&str`, anything `Display`) → handle (Clone, derefs to `Node`): `cell(r, c) -> Txt`, `row(r)`, `column(c) -> Vec<Txt>`, `rows()`, `columns()`, `brackets() -> [Path; 2]`, `row_frame(r)`, `column_frame(c)`, `cell_frame(r, c) -> Rect` (hidden; `.fade_in()` / `.opacity().to(..)`). Builder: `.font_size(px)`, `.cell_width(px)` (room for later, longer values), `.column_gap`, `.row_gap`. Change a value: `m.cell(1, 0).text().set("7")`.
 - `axes.vector(x, y) -> Vector` (derefs to `Line`): `x()`, `y()` signals, `to(x, y, secs)`, `.stroke(paint)`, `.label("v") -> Txt`.
 - `axes.apply_matrix([[a, b], [c, d]], secs) -> Tween` composes with the current matrix; `axes.matrix() -> Signal<Mat2>` (`Mat2::IDENTITY`, `.after(&m)`, `.det()`). Grid deforms; plots, series, vectors, `axes.place`d nodes move; ticks/labels don't.
 - `Table::new(header).row(cells)…` builder: `.widths([px..])`, `.font_size(px)`, `.row_height(px)`. Handle: `row(i) -> TableRow` (`cells()`, `cell(c)`, `background()` hidden Rect, `values()`), `cell(r, c)`, `len()`, `header()`. Await: `insert_row(at, cells)`, `push_row(cells)`, `remove_row(i)`, `sort_by_column(c, secs)` (leading numbers compare numerically), `sort_by(|a, b| .., secs)`.
@@ -212,7 +212,7 @@ transition(Transition::custom(|t| Blend {                 // t is eased progress
 
 `Project::new("name").theme(Theme::dark().accent(color!("#68abdf")))` — also `Theme::light()`, `midnight`, `paper`, `vivid`. Colors: `Background Surface Text Muted Accent OnAccent Success Warning Danger` (`.fill(Accent)`, `.stroke(Muted)`). Type: `.display() .h1() .h2() .body() .caption() .code()`. Space and radius: `Xs Sm Md Lg Xl` (`.padding(Md)`, `.gap(Sm)`, `.margin(Lg)`, `.radius(Lg)`). Shadow: `.elevation(Md)`. Motion: `.to(v, Normal)` (`Fast`/`Slow` too); a tween takes tokens directly, `.fill().to(Accent, Normal)`. `node.fade_in()` / `fade_out()` use the theme's normal duration. `[theme]` in `oxframe.toml` (`name`, `accent`) overrides the compiled theme. Text with no fill uses `Text`.
 
-Every node: `.name("title")` (readable in check/inspect; otherwise the `add` call site), `x y rotation scale(Vec2) opacity fill stroke line_width start end`
+Every node: `.name("title")` (readable in check/inspect; otherwise the `add` call site), `x y rotation scale opacity fill stroke line_width start end`
 (`start/end` trim outlines 0..1), `fill_gradient(Gradient) stroke_gradient dash(vec) dash_offset
 line_cap line_join blur shadow(color, blur, (dx, dy)) glow(color, blur) clip(bool) blend(BlendMode)
 z_index anchor((ax, ay))`, and inside a `Layout`: `grow shrink basis margin align_self`.
@@ -263,13 +263,13 @@ cam.reset(1.2).await;                           // back to x = y = 0, zoom 1, ro
 s.x().to(300.0, 1.0).await;                                  // seconds
 s.x().to(300.0, 1.0).ease(presets::OUT_BACK).await;           // presets::*, oxframe::bounce_out, oxframe::elastic_out, |t| t * t
 s.fill().to(color!("#68abdf"), 0.5).await;                   // colors blend in OKLab
-s.scale().to(Vec2::new(2.0, 2.0), 0.5).await;
+s.scale().to(2.0, 0.5).await;                                // one number, or (x, y)
 all((a.x().to(1.0, 1.0), b.y().to(2.0, 0.5))).await;          // together (tuple ≤ 12)
 all(cards.iter().map(|c| c.fade_in())).await;                 // together, any count
 stagger(0.1, &cards, |c| c.pop_in()).await;                   // staggered starts
 stagger(0.1, &cards, |c| async move { c.pop_in().await; c.fade_out().await; }).await;
 let first = any((a.x().to(1.0, 2.0), wait_for(0.5))).await;   // first to finish (index)
-repeat(3, || dot.scale().to(Vec2::new(1.2, 1.2), 0.3)).await;
+repeat(3, || dot.scale().to(1.2, 0.3)).await;
 spawn(loop_while(|| true, move || dot.rotation().to(dot.rotation().get() + 360.0, 2.0)));  // background loop
 wait_for(0.5).await;  next_frame().await;
 let h = spawn(async move { /* … */ }); h.await;              // background task
