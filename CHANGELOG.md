@@ -4,13 +4,17 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.23.2 — 2026-10-24
 
+- Creates projects on oxframe 0.23.2.
 - `oxframe publish`: renders the project (or takes an MP4), uploads it to
   oxframe.dev and prints a link with a player that unfolds as a video in
   Discord and Slack. Kept for 30 days, up to 30 s and 16 MB (a larger render
   is re-encoded at 720p). `--title` names the page; `--range` publishes part
   of a longer video. Needs ffmpeg and curl.
+- The agent files know `oxframe publish` and to use it only when asked.
+- Listed in the official MCP Registry as `io.github.oxygenframe/oxframe`;
+  every release updates it.
 
 ## 0.23.1 — 2026-10-24
 

@@ -22,6 +22,8 @@ API https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/.
 
 Never run `oxframe dev` (interactive server). Never hand-edit `meta.json` unless asked.
 
+When the user asks for a link to the video, `oxframe publish --title "…"` renders it and prints a public oxframe.dev link (30 days, up to 30 s: `--range 0..30`). Never publish unasked: anyone with the link can watch.
+
 ## API
 
 The full cheat sheet is in [reference.md](reference.md): nodes and their
