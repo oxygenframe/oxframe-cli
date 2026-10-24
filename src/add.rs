@@ -58,6 +58,36 @@ pub const BLOCKS: &[Block] = &[
         usage: r#"blocks::timeline(view, &[("2019", "First commit"), ("2026", "1.0")]).await"#,
         source: include_str!("../templates/blocks/timeline.rs"),
     },
+    Block {
+        name: "release_notes",
+        usage: r#"blocks::release_notes(view, "v0.23.0", &["Custom shaders run", "Effects inside groups"]).await"#,
+        source: include_str!("../templates/blocks/release_notes.rs"),
+    },
+    Block {
+        name: "terminal",
+        usage: r#"blocks::terminal(view, "cargo install oxframe-cli", &["Installed oxframe 0.23.0"]).await"#,
+        source: include_str!("../templates/blocks/terminal.rs"),
+    },
+    Block {
+        name: "code_change",
+        usage: r#"blocks::code_change(view, "rust", "let x = 1;", "let x = 2;").await"#,
+        source: include_str!("../templates/blocks/code_change.rs"),
+    },
+    Block {
+        name: "bar_chart",
+        usage: r#"blocks::bar_chart(view, "Build time, s", &[("rustc", 3.2), ("gcc", 7.5)]).await"#,
+        source: include_str!("../templates/blocks/bar_chart.rs"),
+    },
+    Block {
+        name: "call_to_action",
+        usage: r#"blocks::call_to_action(view, "Try it today", "oxframe.dev").await"#,
+        source: include_str!("../templates/blocks/call_to_action.rs"),
+    },
+    Block {
+        name: "kinetic_title",
+        usage: r#"blocks::kinetic_title(view, "Motion graphics your agent checks").await"#,
+        source: include_str!("../templates/blocks/kinetic_title.rs"),
+    },
 ];
 
 /// `quote-card` and `quote_card` both name `quote_card`.

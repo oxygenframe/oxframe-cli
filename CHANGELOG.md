@@ -4,6 +4,14 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## Unreleased
+
+- `oxframe add`: six more blocks — `release-notes` (a version and its
+  changes), `terminal` (a typed command and its output), `code-change` (code
+  that diffs into its new version), `bar-chart`, `kinetic-title` (words pop
+  in) and `call-to-action` (a closing line and a link). All twelve pass
+  `oxframe check` in one tour (e2e test).
+
 ## 0.22.0 — 2026-10-23
 
 - Creates projects on oxframe 0.22.0: `oxframe check` compares with an
