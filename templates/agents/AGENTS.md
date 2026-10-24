@@ -4,6 +4,9 @@
 This is an **oxframe** project: procedural animation in Rust. Scenes are
 `async fn`s; every `.await` on an animation takes time.
 
+Here a request to explain, show or walk through something means a video:
+write or change a scene and check it, rather than answering in chat.
+
 This project uses **oxframe {{SDK_VERSION}}**. Use the docs of exactly this
 version — the API changes between versions:
 
@@ -176,4 +179,8 @@ Make an event (a splash, a swell) a signal change at that moment, such as `lens.
 - `.size(s)` takes one number: a square `Rect`, the diameter of a `Circle`. A `w × h` rectangle is `Rect::new().width(w).height(h)`, and its handle animates `width()` and `height()`; `node.size()` only reads the box as `(w, h)`.
 - `view.size()` is `(u32, u32)` pixels: `let (w, h) = view.size(); let w = w as f64;` before multiplying by a float.
 - `Txt` has no `width()`: read the laid-out box with `label.size().0`.
+- `.name("…")` is a builder call: set it before `add`. A handle (`Circle`, `Plot`, `Series`) has no `name()`.
+- `Vec2` and `Point` have fields `.x` and `.y`, not `.0` and `.1`.
+- Bar names are one call on the builder: `axes.bars([3.0, 5.0]).labels(["a", "b"])`; there is no `.label(i, …)`.
+- A component is added first, then entered: `let c = view.add(Callout::new(node).text("here")); c.enter().await;`.
 - *"cannot find type `Vec3` / `View3d`"*: 3D is behind a feature: `oxframe = { ..., features = ["3d"] }` in Cargo.toml.
