@@ -317,7 +317,7 @@ fn every_block_adds_and_checks_clean() {
         .iter()
         .map(|b| b["name"].as_str().unwrap().to_owned())
         .collect();
-    assert!(names.len() >= 12, "{names:?}");
+    assert!(names.len() >= 18, "{names:?}");
     for name in &names {
         let st = oxframe()
             .current_dir(&dir)
