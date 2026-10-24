@@ -153,7 +153,7 @@ Pick a preset before writing WGSL:
 | A scene change through water | `Transition::shader(shaders::water_wipe())` |
 | Anything else | `Shader::source` with your own `shade`, or `Custom` |
 
-Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Never put either inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect: `check` reports `input_cycle` and skips the shader. In `water_wipe`, add the next scene's background before the `transition` call.
+Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect they read what that group drew before them, and the group then fades or blurs as a whole. In `water_wipe`, add the next scene's background before the `transition` call.
 
 ## Rules
 
