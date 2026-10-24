@@ -132,7 +132,7 @@ sea.amp().to(0.12, 1.2).await;
 
 `shaders::waves()` is a node. `.amp()`, `.speed()`, `.deep()` and `.foam()` are signals. A theme role such as `Accent` follows the theme. The node is a box and has no children; put a title on the view.
 
-`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. A custom `shade` runs on the CPU in `check`, `render` and `dev`, not in the playground.
+`Shader::source(wgsl)` and `Shader::file(path)` take WGSL with `struct Params`, the uniform `p`, and `fn shade`. oxframe adds `ox` and `ShadeIn`. `.uniform("amp", 0.3)` sets a field. A name or type that is not in `Params` fails `check`. A file is read on every draw, so saving it updates the scene without a rebuild. A custom `shade` runs on the CPU in `check`, `render` and `dev`, not in the playground. `.input("photo", Input::file("photo.png"))` is read with `sample_photo(uv)`; `.input("scene", Input::frame())` with `sample_scene(i.screen / ox.resolution)`.
 
 ```rust
 let lens = view.add(shaders::lens_drops().wetness(0.0).fullscreen()); // add it last
