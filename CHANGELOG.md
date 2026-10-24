@@ -4,14 +4,17 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.23.3 — 2026-10-24
 
+- Creates projects on oxframe 0.23.3.
 - `oxframe add`: six more blocks — `feature-grid` (feature cards in a row),
   `checklist` (items ticked off), `comparison` (a yes/no table against
   another product), `chat-messages` (a conversation in bubbles),
   `pull-request` (a PR card that gets merged) and `countdown` (numbers in a
   filling ring). All eighteen pass `oxframe check` in one tour (e2e test).
 - The agent files no longer say a custom `shade` skips the playground.
+- The agent files say that a request to explain or show something means a
+  scene, and cover four compile errors common in the 0.23.2 agent eval.
 
 ## 0.23.2 — 2026-10-24
 
