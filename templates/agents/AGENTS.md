@@ -26,6 +26,7 @@ version — the API changes between versions:
 | One full-size still | `oxframe snapshot --at 1.5` → prints the PNG path |
 | Scene length, markers | `cargo run -q -- info` (JSON) |
 | Final video | `oxframe render` → `out/<project>.mp4` (needs ffmpeg) |
+| A link to show the video | `oxframe publish --title "…"` → a public oxframe.dev link for 30 days (up to 30 s; `--range 0..30`). Only when the user asks: anyone with the link can watch |
 | A ready-made, checked block | `oxframe add` lists them; `oxframe add stat-counter` writes `src/blocks/stat_counter.rs` and `mod blocks;`; call `blocks::stat_counter(view, 1280.0, "stars").await` |
 
 Add `--json` to any command for one JSON object on stdout (`ok`, `exit`, and
