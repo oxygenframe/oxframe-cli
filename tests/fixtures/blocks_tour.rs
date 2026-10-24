@@ -30,6 +30,45 @@ async fn tour(view: View) {
     .await;
     wait_for(1.5).await;
     b.fade_out().await;
+    let b = blocks::release_notes(
+        view,
+        "v0.23.0",
+        &["Custom shaders run", "Effects inside groups", "Six new blocks"],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::terminal(
+        view,
+        "cargo install oxframe-cli",
+        &["Compiling oxframe v0.23.0", "Installed oxframe"],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::code_change(
+        view,
+        "rust",
+        "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+        "fn add(a: i64, b: i64) -> i64 {\n    a.saturating_add(b)\n}",
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::bar_chart(
+        view,
+        "Build time, s",
+        &[("rustc", 3.2), ("gcc", 7.5), ("clang", 5.1)],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::kinetic_title(view, "Motion graphics your agent checks").await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::call_to_action(view, "Try it today", "oxframe.dev").await;
+    wait_for(1.5).await;
+    b.fade_out().await;
 }
 
 fn main() {
