@@ -66,6 +66,55 @@ async fn tour(view: View) {
     let b = blocks::kinetic_title(view, "Motion graphics your agent checks").await;
     wait_for(1.5).await;
     b.fade_out().await;
+    let b = blocks::feature_grid(
+        view,
+        &[
+            ("Fast", "Renders natively, no browser"),
+            ("Checked", "Agents read the report"),
+            ("Open", "MIT or Apache-2.0"),
+        ],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::checklist(
+        view,
+        "Before you ship",
+        &["Tests pass", "Docs updated", "Video rendered"],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::comparison(
+        view,
+        "oxframe",
+        "Others",
+        &[
+            ("Renders without a browser", true, false),
+            ("Scenes in Rust", true, false),
+            ("Live preview", true, true),
+        ],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::chat_messages(
+        view,
+        &[
+            (false, "Can it render on CI?"),
+            (true, "Yes, on the CPU, without a GPU"),
+            (false, "Nice, adding it today"),
+        ],
+    )
+    .await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::pull_request(view, 482, "Render on the GPU by default", 120, 38).await;
+    wait_for(1.5).await;
+    b.fade_out().await;
+    let b = blocks::countdown(view, 3, "Go!").await;
+    wait_for(1.5).await;
+    b.fade_out().await;
     let b = blocks::call_to_action(view, "Try it today", "oxframe.dev").await;
     wait_for(1.5).await;
     b.fade_out().await;

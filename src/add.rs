@@ -88,6 +88,36 @@ pub const BLOCKS: &[Block] = &[
         usage: r#"blocks::kinetic_title(view, "Motion graphics your agent checks").await"#,
         source: include_str!("../templates/blocks/kinetic_title.rs"),
     },
+    Block {
+        name: "feature_grid",
+        usage: r#"blocks::feature_grid(view, &[("Fast", "Renders natively"), ("Checked", "Agents read the report")]).await"#,
+        source: include_str!("../templates/blocks/feature_grid.rs"),
+    },
+    Block {
+        name: "checklist",
+        usage: r#"blocks::checklist(view, "Before you ship", &["Tests pass", "Docs updated"]).await"#,
+        source: include_str!("../templates/blocks/checklist.rs"),
+    },
+    Block {
+        name: "comparison",
+        usage: r#"blocks::comparison(view, "oxframe", "Others", &[("Renders without a browser", true, false)]).await"#,
+        source: include_str!("../templates/blocks/comparison.rs"),
+    },
+    Block {
+        name: "chat_messages",
+        usage: r#"blocks::chat_messages(view, &[(false, "Can it render on CI?"), (true, "Yes, on the CPU")]).await"#,
+        source: include_str!("../templates/blocks/chat_messages.rs"),
+    },
+    Block {
+        name: "pull_request",
+        usage: r#"blocks::pull_request(view, 482, "Render on the GPU by default", 120, 38).await"#,
+        source: include_str!("../templates/blocks/pull_request.rs"),
+    },
+    Block {
+        name: "countdown",
+        usage: r#"blocks::countdown(view, 3, "Go!").await"#,
+        source: include_str!("../templates/blocks/countdown.rs"),
+    },
 ];
 
 /// `quote-card` and `quote_card` both name `quote_card`.
