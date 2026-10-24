@@ -1,5 +1,11 @@
 # oxframe-cli
 
+[![crates.io](https://img.shields.io/crates/v/oxframe-cli.svg)](https://crates.io/crates/oxframe-cli)
+[![ci](https://img.shields.io/github/actions/workflow/status/oxygenframe/oxframe-cli/ci.yml?branch=main&label=ci)](https://github.com/oxygenframe/oxframe-cli/actions/workflows/ci.yml)
+[![docs](https://img.shields.io/badge/docs-oxframe.dev-blue)](https://oxframe.dev/docs/cli)
+[![license](https://img.shields.io/crates/l/oxframe-cli.svg)](https://github.com/oxygenframe/oxframe-cli#license)
+[![playground](https://img.shields.io/badge/try-playground-e13238)](https://oxframe.dev/playground)
+
 > **Status:** oxframe is under very active development. The API is not stable yet and may change from version to version. Pin the exact version in your Cargo.toml and check the [changelog](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md) before upgrading.
 
 The `oxframe` command for [oxframe](https://github.com/oxygenframe/oxframe-sdk)
@@ -91,3 +97,7 @@ cargo test --test e2e -- --ignored --nocapture      # init → dev → reload �
 ```
 
 Licensed under MIT or Apache-2.0.
+
+## License
+
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
