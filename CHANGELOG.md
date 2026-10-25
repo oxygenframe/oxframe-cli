@@ -6,6 +6,9 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.23.5 — 2026-10-25
+
+- Creates projects on oxframe 0.23.5.
 - Six more blocks for `oxframe add` (24 in all): `metric-row` (numbers
   counting up side by side), `key-combo` (a keyboard shortcut pressed key by
   key), `steps` (numbered steps filling in along a line), `social-post`
