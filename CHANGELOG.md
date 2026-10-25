@@ -6,6 +6,12 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.23.6 — 2026-10-25
+
+- Creates projects on oxframe 0.23.6. 0.23.5 broke projects on oxframe
+  0.23.0–0.23.4 (and is yanked): `oxframe upgrade` moves a project on it to
+  0.23.6.
+
 ## 0.23.5 — 2026-10-25
 
 - Creates projects on oxframe 0.23.5.
