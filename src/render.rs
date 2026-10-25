@@ -24,6 +24,8 @@ pub struct RenderArgs {
     pub slides: Option<std::path::PathBuf>,
     /// Segments rendered at once.
     pub jobs: Option<u32>,
+    /// Frame rate of a GIF.
+    pub fps: Option<u32>,
     pub json: bool,
 }
 
@@ -118,6 +120,9 @@ pub fn run(a: RenderArgs) -> Done {
     }
     if let Some(n) = a.jobs {
         cmd.args(["--jobs", &n.to_string()]);
+    }
+    if let Some(n) = a.fps {
+        cmd.args(["--fps", &n.to_string()]);
     }
     cmd.args(cfg.theme.args());
     let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, a.json) {

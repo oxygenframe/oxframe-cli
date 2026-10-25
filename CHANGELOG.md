@@ -4,6 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
+## Unreleased
+
+- `oxframe render --format gif` (or `--out demo.gif`): an animated GIF for a
+  README, a pull request or a chat, 720 wide and 15 fps unless `--size` and
+  `--fps` say otherwise. The MCP `render` tool takes `format: "gif"` and `fps`.
+
 ## 0.23.4 — 2026-10-25
 
 - Creates projects on oxframe 0.23.4.

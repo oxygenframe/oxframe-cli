@@ -193,7 +193,7 @@ fn ffmpeg() -> Check {
         return Check {
             name: "ffmpeg",
             status: Status::Warn,
-            detail: "not found: needed for MP4, WebM and ProRes; PNG frames and `oxframe dev` work without it".into(),
+            detail: "not found: needed for MP4, WebM, ProRes and GIF; PNG frames and `oxframe dev` work without it".into(),
             fix: Some(
                 crate::render::FFMPEG_HELP
                     .lines()
