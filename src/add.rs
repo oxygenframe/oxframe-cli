@@ -118,6 +118,36 @@ pub const BLOCKS: &[Block] = &[
         usage: r#"blocks::countdown(view, 3, "Go!").await"#,
         source: include_str!("../templates/blocks/countdown.rs"),
     },
+    Block {
+        name: "metric_row",
+        usage: r#"blocks::metric_row(view, &[(98.0, "% uptime"), (1.2, "s to render"), (47.0, "prompts")]).await"#,
+        source: include_str!("../templates/blocks/metric_row.rs"),
+    },
+    Block {
+        name: "key_combo",
+        usage: r#"blocks::key_combo(view, &["Ctrl", "Shift", "P"], "Open the command palette").await"#,
+        source: include_str!("../templates/blocks/key_combo.rs"),
+    },
+    Block {
+        name: "steps",
+        usage: r#"blocks::steps(view, &["Write the scene", "Check it", "Render"]).await"#,
+        source: include_str!("../templates/blocks/steps.rs"),
+    },
+    Block {
+        name: "social_post",
+        usage: r#"blocks::social_post(view, "Ada", "@ada", "Rendered my first video in Rust today.", 1284.0).await"#,
+        source: include_str!("../templates/blocks/social_post.rs"),
+    },
+    Block {
+        name: "split_screen",
+        usage: r#"blocks::split_screen(view, ("Before", &["12 s renders", "No preview"]), ("After", &["1.2 s renders", "Live editor"])).await"#,
+        source: include_str!("../templates/blocks/split_screen.rs"),
+    },
+    Block {
+        name: "search_bar",
+        usage: r#"blocks::search_bar(view, "rust motion graphics", &["oxframe.dev", "docs.rs/oxframe"]).await"#,
+        source: include_str!("../templates/blocks/search_bar.rs"),
+    },
 ];
 
 /// `quote-card` and `quote_card` both name `quote_card`.
