@@ -6,6 +6,11 @@ same version (see the SDK's
 
 ## Unreleased
 
+- Six more blocks for `oxframe add` (24 in all): `metric-row` (numbers
+  counting up side by side), `key-combo` (a keyboard shortcut pressed key by
+  key), `steps` (numbered steps filling in along a line), `social-post`
+  (author, text and likes counting up), `split-screen` (two columns with a
+  divider) and `search-bar` (a query typed, results dropping in).
 - The agent files mention `Project::loudness`.
 - No ffmpeg installed? `oxframe render` and `oxframe publish` download a
   static build once (about 25 MB, checked by SHA-256) into the oxframe cache
