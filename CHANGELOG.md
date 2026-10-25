@@ -6,6 +6,7 @@ same version (see the SDK's
 
 ## Unreleased
 
+- The agent files mention `Project::loudness`.
 - No ffmpeg installed? `oxframe render` and `oxframe publish` download a
   static build once (about 25 MB, checked by SHA-256) into the oxframe cache
   and use it for the project, the preview and video clips. `oxframe ffmpeg`
