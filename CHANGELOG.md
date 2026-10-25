@@ -6,6 +6,13 @@ same version (see the SDK's
 
 ## Unreleased
 
+- `oxframe transcribe vo/intro.wav` times the words of a recorded voice-over
+  with whisper.cpp (`whisper-cli`, installed separately: `brew install
+  whisper-cpp`) and writes `vo/intro.words.json` for
+  `voice("…").recording("vo/intro.wav")`. Nothing leaves the machine. The
+  model (`--model tiny|base|small`, base by default) is downloaded once into
+  the oxframe cache and checked by SHA-256; `--language ru` skips detection.
+
 ## 0.23.6 — 2026-10-25
 
 - Creates projects on oxframe 0.23.6. 0.23.5 broke projects on oxframe

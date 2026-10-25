@@ -59,13 +59,18 @@ fn exe_name() -> &'static str {
     }
 }
 
-/// Folder the downloaded ffmpeg lives in.
-pub fn dir() -> Option<PathBuf> {
+/// `<user cache>/oxframe`, for downloads (ffmpeg, speech models).
+pub fn cache_root() -> Option<PathBuf> {
     let base = std::env::var_os("XDG_CACHE_HOME")
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("LOCALAPPDATA").map(PathBuf::from))
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".cache")))?;
-    Some(base.join("oxframe").join("ffmpeg").join(TAG))
+    Some(base.join("oxframe"))
+}
+
+/// Folder the downloaded ffmpeg lives in.
+pub fn dir() -> Option<PathBuf> {
+    Some(cache_root()?.join("ffmpeg").join(TAG))
 }
 
 /// The downloaded ffmpeg, if there is one.
@@ -184,7 +189,7 @@ fn download_into(dir: &Path, quiet: bool) -> Result<PathBuf, String> {
     Ok(bin)
 }
 
-fn hex(bytes: &[u8]) -> String {
+pub(crate) fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
