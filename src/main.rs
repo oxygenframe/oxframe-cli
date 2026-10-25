@@ -109,11 +109,15 @@ enum Cmd {
         /// Seconds, e.g. 1.5..4
         #[arg(long)]
         range: Option<String>,
-        /// mp4 | webm | prores | png
+        /// mp4 | webm | prores | png | gif
         #[arg(long)]
         format: Option<String>,
+        /// Output size, e.g. 1280x720. A GIF is 720 wide at most unless set.
         #[arg(long)]
         size: Option<String>,
+        /// Frames per second of a GIF (default 15).
+        #[arg(long)]
+        fps: Option<u32>,
         /// 16:9, 9:16, 1:1, or all. `all` renders every format the project declares.
         #[arg(long)]
         aspect: Option<String>,
@@ -296,6 +300,7 @@ fn main() -> ExitCode {
             subtitles,
             slides,
             jobs,
+            fps,
         } => render::run(render::RenderArgs {
             out,
             scene,
@@ -309,6 +314,7 @@ fn main() -> ExitCode {
             subtitles,
             slides,
             jobs,
+            fps,
             json: cli.json,
         }),
         Cmd::Publish {

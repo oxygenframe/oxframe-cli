@@ -130,13 +130,14 @@ fn tools() -> Vec<Value> {
         ),
         tool(
             "render",
-            "Release-build the project and render the video (or a PNG sequence).",
+            "Release-build the project and render the video (or a PNG sequence, or a GIF for a README or a pull request).",
             json!({
                 "type": "object",
                 "properties": {
                     "scene": { "type": "string" },
                     "aspect": { "type": "string", "description": "16:9, 9:16, 1:1 or all." },
-                    "format": { "type": "string" },
+                    "format": { "type": "string", "description": "mp4 (default), webm, prores, png or gif." },
+                    "fps": { "type": "integer", "description": "GIF frame rate (default 15)." },
                     "size": { "type": "string" },
                     "cpu": { "type": "boolean" },
                     "gpu": { "type": "boolean" }
@@ -225,6 +226,7 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             subtitles: None,
             slides: None,
             jobs: None,
+            fps: args["fps"].as_u64().and_then(|n| u32::try_from(n).ok()),
             json: true,
         })),
         _ => (format!("unknown tool: {name}"), true),

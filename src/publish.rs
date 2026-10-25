@@ -75,6 +75,7 @@ pub fn run(a: PublishArgs) -> Done {
                 subtitles: None,
                 slides: None,
                 jobs: None,
+                fps: None,
                 json: a.json,
             });
             if done.code != exit::OK {
