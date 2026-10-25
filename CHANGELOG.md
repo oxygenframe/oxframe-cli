@@ -6,6 +6,8 @@ same version (see the SDK's
 
 ## Unreleased
 
+- The agent files point to `fix` in each `oxframe check` issue: the change
+  with the numbers worked out.
 - `oxframe render --format gif` (or `--out demo.gif`): an animated GIF for a
   README, a pull request or a chat, 720 wide and 15 fps unless `--size` and
   `--fps` say otherwise. The MCP `render` tool takes `format: "gif"` and `fps`.
