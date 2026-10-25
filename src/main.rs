@@ -11,6 +11,7 @@ mod check;
 mod config;
 mod dev;
 mod doctor;
+mod ffmpeg;
 mod hints;
 mod init;
 mod mcp;
@@ -221,6 +222,10 @@ enum Cmd {
         #[arg(long)]
         force: bool,
     },
+    /// Download a static ffmpeg into the oxframe cache and print its path.
+    /// `render` does this by itself when no ffmpeg is installed; set
+    /// OXFRAME_NO_FFMPEG_DOWNLOAD=1 to turn that off.
+    Ffmpeg,
     /// MCP server on stdin/stdout (tools: check, storyboard, render_frame, inspect, render_graph, list_components, docs_search, render).
     Mcp {
         /// Project directory; the current one by default. For clients that start servers elsewhere.
@@ -354,6 +359,15 @@ fn main() -> ExitCode {
             reply::done(cli.json, code, serde_json::json!({"command": "agents"}))
         }
         Cmd::Doctor => doctor::run(cli.json),
+        Cmd::Ffmpeg => match ffmpeg::download(cli.json) {
+            Ok(bin) => {
+                if !cli.json {
+                    println!("{}", bin.display());
+                }
+                reply::done(cli.json, exit::OK, serde_json::json!({ "ffmpeg": bin }))
+            }
+            Err(e) => reply::fail(cli.json, exit::ENV, e),
+        },
         Cmd::Add { block, force } => add::run(block, force, cli.json),
         Cmd::Upgrade => {
             let code = upgrade::run();

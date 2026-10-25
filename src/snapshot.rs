@@ -53,6 +53,9 @@ pub fn run(a: SnapshotArgs) -> Done {
     let mut cmd = Command::new(exe);
     // CPU rendering: identical output everywhere, no GPU needed.
     cmd.current_dir(&root).args(["render", "--cpu"]);
+    if let Some(path) = crate::ffmpeg::child_path() {
+        cmd.env("PATH", path);
+    }
     for t in &a.at {
         cmd.args(["--at", &t.to_string()]);
     }

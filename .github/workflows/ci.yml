@@ -29,6 +29,9 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+      # The static ffmpeg `render` downloads when none is installed: the
+      # build for this OS, its checksum, and every encoder oxframe uses.
+      - run: cargo test downloaded_ffmpeg -- --ignored
       # The Windows installer, on the latest release, in both PowerShells.
       - name: install.ps1 (Windows PowerShell 5.1 and pwsh 7)
         if: runner.os == 'Windows'

@@ -149,6 +149,9 @@ impl Supervisor {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);
+        if let Some(path) = crate::ffmpeg::child_path() {
+            cmd.env("PATH", path);
+        }
         if self.cpu {
             cmd.arg("--cpu");
         }

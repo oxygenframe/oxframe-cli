@@ -6,6 +6,11 @@ same version (see the SDK's
 
 ## Unreleased
 
+- No ffmpeg installed? `oxframe render` and `oxframe publish` download a
+  static build once (about 25 MB, checked by SHA-256) into the oxframe cache
+  and use it for the project, the preview and video clips. `oxframe ffmpeg`
+  downloads it ahead of time (CI, offline work); `OXFRAME_NO_FFMPEG_DOWNLOAD=1`
+  turns it off. `oxframe doctor` shows which ffmpeg is used.
 - The agent files point to `fix` in each `oxframe check` issue: the change
   with the numbers worked out.
 - `oxframe render --format gif` (or `--out demo.gif`): an animated GIF for a

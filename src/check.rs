@@ -148,7 +148,7 @@ pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
 
     if render::find_ffmpeg(cfg.render.ffmpeg.as_deref()).is_none() && !json {
         anstream::eprintln!(
-            "\nwarning: ffmpeg not found — `oxframe render` will only produce PNG sequences.\n{}",
+            "\nnote: ffmpeg not found — `oxframe render` will download a static build the first time.\n{}",
             render::FFMPEG_HELP
         );
     }
@@ -167,6 +167,9 @@ pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
     }
     let mut cmd = Command::new(exe);
     cmd.current_dir(&root).arg("check");
+    if let Some(path) = crate::ffmpeg::child_path() {
+        cmd.env("PATH", path);
+    }
     let c = &cfg.check;
     let interval = c.interval.to_string();
     let inset = c.safe_inset.to_string();
@@ -270,6 +273,9 @@ pub fn inspect(at: f64, scene: Option<String>, graph: bool, json: bool) -> Done 
     let mut cmd = Command::new(exe);
     cmd.current_dir(&root)
         .args(["inspect", "--at", &at.to_string()]);
+    if let Some(path) = crate::ffmpeg::child_path() {
+        cmd.env("PATH", path);
+    }
     if let Some(scene) = &scene {
         cmd.args(["--scene", scene]);
     }

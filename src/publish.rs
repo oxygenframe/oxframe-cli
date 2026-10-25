@@ -47,8 +47,9 @@ pub fn run(a: PublishArgs) -> Done {
         .as_deref()
         .and_then(|r| config::Config::load(r).ok())
         .unwrap_or_default();
-    let Some(ffmpeg) = crate::render::find_ffmpeg(cfg.render.ffmpeg.as_deref()) else {
-        return crate::reply::fail(a.json, exit::ENV, crate::render::FFMPEG_HELP);
+    let ffmpeg = match crate::ffmpeg::ensure(cfg.render.ffmpeg.as_deref(), a.json) {
+        Ok(f) => f,
+        Err(e) => return crate::reply::fail(a.json, exit::ENV, e),
     };
 
     let video = match &a.file {
