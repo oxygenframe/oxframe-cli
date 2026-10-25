@@ -19,6 +19,7 @@ mod publish;
 mod render;
 mod reply;
 mod snapshot;
+mod transcribe;
 mod ui;
 mod update_check;
 mod upgrade;
@@ -226,6 +227,22 @@ enum Cmd {
     /// `render` does this by itself when no ffmpeg is installed; set
     /// OXFRAME_NO_FFMPEG_DOWNLOAD=1 to turn that off.
     Ffmpeg,
+    /// Time the words of recorded voice-overs with whisper.cpp, on this
+    /// machine: writes `<name>.words.json` next to each file for
+    /// `voice("…").recording("<file>")`.
+    Transcribe {
+        /// Audio files (any format ffmpeg reads).
+        files: Vec<std::path::PathBuf>,
+        /// tiny, base or small (downloaded once), or the path of a ggml model.
+        #[arg(long, default_value = "base")]
+        model: String,
+        /// Spoken language, such as en or ru; auto detects it.
+        #[arg(long, default_value = "auto")]
+        language: String,
+        /// whisper.cpp's whisper-cli, if it is not on PATH.
+        #[arg(long)]
+        whisper: Option<std::path::PathBuf>,
+    },
     /// MCP server on stdin/stdout (tools: check, storyboard, render_frame, inspect, render_graph, list_components, docs_search, render).
     Mcp {
         /// Project directory; the current one by default. For clients that start servers elsewhere.
@@ -368,6 +385,20 @@ fn main() -> ExitCode {
             }
             Err(e) => reply::fail(cli.json, exit::ENV, e),
         },
+        Cmd::Transcribe {
+            files,
+            model,
+            language,
+            whisper,
+        } => transcribe::run(
+            &transcribe::Options {
+                files,
+                model,
+                language,
+                whisper,
+            },
+            cli.json,
+        ),
         Cmd::Add { block, force } => add::run(block, force, cli.json),
         Cmd::Upgrade => {
             let code = upgrade::run();
