@@ -6,6 +6,10 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.23.8 — 2026-10-25
+
+- Creates projects on oxframe 0.23.8.
+
 ## 0.23.7 — 2026-10-25
 
 - Creates projects on oxframe 0.23.7.

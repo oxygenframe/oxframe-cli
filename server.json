@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://oxframe.dev/docs/mcp",
-  "version": "0.23.7",
+  "version": "0.23.8",
   "packages": [
     {
       "registryType": "cargo",
       "identifier": "oxframe-cli",
-      "version": "0.23.7",
+      "version": "0.23.8",
       "transport": {
         "type": "stdio"
       },
