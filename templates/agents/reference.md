@@ -27,7 +27,7 @@ sound("assets/whoosh.wav").volume(0.6).fade_in(0.05).play();       // starts now
 sound("assets/click.wav").trim(0.0, 0.2).priority().await;         // waits out the slice
 ```
 
-`.play()` records the clip at the current frame and continues. Awaiting waits until the clip ends. `.trim(start, end)` is the length of that wait and does not need to open the file. `.priority()` ducks a soundtrack built with `.duck_under_voice()`. Effects are clips on the timeline and play during playback and seeking. `oxframe render` mixes them with the soundtrack before ffmpeg encodes; `--no-audio` drops both, and `--range` keeps only the part inside the range. Dragging the waveform changes the soundtrack offset in `meta.json`.
+`.play()` records the clip at the current frame and continues. Awaiting waits until the clip ends. `.trim(start, end)` is the length of that wait and does not need to open the file. `.priority()` ducks a soundtrack built with `.duck_under_voice()`. Effects are clips on the timeline and play during playback and seeking. `oxframe render` mixes them with the soundtrack before ffmpeg encodes; `--no-audio` drops both, and `--range` keeps only the part inside the range. Dragging the waveform changes the soundtrack offset in `meta.json`. `Project::new(..).loudness(-14.0)` brings the whole mix to -14 LUFS (YouTube; `-16.0` for podcasts); the render prints the loudness it got.
 
 ## Voice
 
