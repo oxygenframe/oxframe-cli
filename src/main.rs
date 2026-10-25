@@ -217,8 +217,12 @@ enum Cmd {
         #[arg(long)]
         force: bool,
     },
-    /// MCP server on stdin/stdout (tools: check, storyboard, render_frame, inspect, list_components, docs_search, render).
-    Mcp,
+    /// MCP server on stdin/stdout (tools: check, storyboard, render_frame, inspect, render_graph, list_components, docs_search, render).
+    Mcp {
+        /// Project directory; the current one by default. For clients that start servers elsewhere.
+        #[arg(long)]
+        dir: Option<std::path::PathBuf>,
+    },
 }
 
 fn main() -> ExitCode {
@@ -234,7 +238,7 @@ fn main() -> ExitCode {
         .with_writer(std::io::stderr)
         .init();
 
-    if !matches!(cli.command, Cmd::Mcp) {
+    if !matches!(cli.command, Cmd::Mcp { .. }) {
         update_check::run();
     }
     let done = match cli.command {
@@ -349,7 +353,15 @@ fn main() -> ExitCode {
             let code = upgrade::run();
             reply::done(cli.json, code, serde_json::json!({"command": "upgrade"}))
         }
-        Cmd::Mcp => mcp::serve(),
+        Cmd::Mcp { dir } => {
+            if let Some(dir) = dir
+                && let Err(e) = std::env::set_current_dir(&dir)
+            {
+                error(format!("cannot open {}: {e}", dir.display()));
+                return ExitCode::from(exit::ENV);
+            }
+            mcp::serve()
+        }
     };
     if cli.json && !done.printed {
         reply::emit(&done);
