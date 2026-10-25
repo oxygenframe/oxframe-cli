@@ -7,7 +7,7 @@
     "url": "https://github.com/oxygenframe/oxframe-cli",
     "source": "github"
   },
-  "websiteUrl": "https://oxframe.dev/docs/agents",
+  "websiteUrl": "https://oxframe.dev/docs/mcp",
   "version": "0.23.3",
   "packages": [
     {
