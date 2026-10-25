@@ -44,17 +44,14 @@ pub fn run(a: RenderArgs) -> Done {
         || a.out
             .as_ref()
             .is_some_and(|o| o.extension().is_none() && a.format.is_none());
-    if !png && find_ffmpeg(cfg.render.ffmpeg.as_deref()).is_none() {
+    // Without one, a static ffmpeg is downloaded once (crate::ffmpeg).
+    if !png && let Err(e) = crate::ffmpeg::ensure(cfg.render.ffmpeg.as_deref(), a.json) {
         let hints = crate::hints::from_text(FFMPEG_HELP);
         if !a.json {
-            crate::error(FFMPEG_HELP);
+            crate::error(&e);
             crate::hints::show(&hints);
         }
-        return crate::reply::done(
-            a.json,
-            exit::ENV,
-            json!({ "error": FFMPEG_HELP, "hints": hints }),
-        );
+        return crate::reply::done(a.json, exit::ENV, json!({ "error": e, "hints": hints }));
     }
 
     if !a.json {
@@ -86,6 +83,9 @@ pub fn run(a: RenderArgs) -> Done {
 
     let mut cmd = Command::new(exe);
     cmd.current_dir(&root).arg("render");
+    if let Some(path) = crate::ffmpeg::child_path() {
+        cmd.env("PATH", path);
+    }
     if let Some(o) = &a.out {
         cmd.arg("--out").arg(o);
     }
@@ -151,6 +151,7 @@ ffmpeg was not found in PATH. Install it and try again:
   Linux:   sudo apt install ffmpeg      (or dnf/pacman install ffmpeg)
   macOS:   brew install ffmpeg
   Windows: winget install Gyan.FFmpeg   (then reopen the terminal)
+or run `oxframe ffmpeg` to download a static build into the oxframe cache,
 or set `ffmpeg = \"/path/to/ffmpeg\"` under [render] in oxframe.toml.
 PNG sequences (--format png) do not need ffmpeg.";
 
@@ -164,9 +165,11 @@ pub fn find_ffmpeg(explicit: Option<&std::path::Path>) -> Option<std::path::Path
     } else {
         "ffmpeg"
     };
-    std::env::var_os("PATH").and_then(|paths| {
-        std::env::split_paths(&paths)
-            .map(|d| d.join(name))
-            .find(|p| p.is_file())
-    })
+    std::env::var_os("PATH")
+        .and_then(|paths| {
+            std::env::split_paths(&paths)
+                .map(|d| d.join(name))
+                .find(|p| p.is_file())
+        })
+        .or_else(crate::ffmpeg::cached)
 }
