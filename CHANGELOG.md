@@ -4,10 +4,12 @@
 same version (see the SDK's
 [CHANGELOG](https://github.com/oxygenframe/oxframe-sdk/blob/main/CHANGELOG.md)).
 
-## Unreleased
+## 0.23.4 — 2026-10-25
 
+- Creates projects on oxframe 0.23.4.
 - `oxframe mcp --dir <project>`: serve a project other than the current
   directory, for MCP clients that start servers elsewhere.
+- The MCP Registry entry links to https://oxframe.dev/docs/mcp.
 
 ## 0.23.3 — 2026-10-24
 
