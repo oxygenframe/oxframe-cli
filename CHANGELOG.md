@@ -6,6 +6,19 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.24.1 — 2026-10-26
+
+- Notes reach the agent without a message in the chat. `oxframe notes
+  wait` returns as soon as there is an open note nobody has taken and
+  prints it; the agent instructions ask agents to keep it running in the
+  background while you review, and to start it again after each note.
+- `oxframe notes take <id>` (MCP: `note_take`) marks a note as being worked
+  on; with `--reply` it asks the person a question. Editor 0.2.2 shows
+  "agent is on it" and a Send back button that hands the note back.
+- `oxframe init` and `oxframe agents` add a Claude Code hook to
+  `.claude/settings.json` (keeping what is there) that shows the open notes
+  with every prompt. `oxframe notes` also prints the path of each crop.
+
 ## 0.24.0 — 2026-10-26
 
 - Notes for the agent. In `oxframe dev` (editor 0.2.1), Comment or C marks

@@ -229,6 +229,7 @@ mod tests {
             "CLAUDE.md",
             ".claude/skills/oxframe/SKILL.md",
             ".claude/skills/oxframe/reference.md",
+            ".claude/settings.json",
         ] {
             assert!(dir.join(f).exists(), "{f}");
         }

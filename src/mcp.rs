@@ -73,12 +73,24 @@ fn tools() -> Vec<Value> {
         ),
         tool(
             "notes",
-            "Review notes a person left in the `oxframe dev` editor: text, time, node, file:line, marked area and a crop. `check` also reports the open ones first, as review_note errors. Fix what each says, then close it with note_done.",
+            "Review notes a person left in the `oxframe dev` editor: text, time, node, file:line, marked area and a crop. `check` also reports the open ones first, as review_note errors. Take one with note_take, fix what it says, then close it with note_done.",
             json!({
                 "type": "object",
                 "properties": {
                     "all": { "type": "boolean", "description": "Also closed notes." }
                 }
+            }),
+        ),
+        tool(
+            "note_take",
+            "Mark a review note as yours before working on it; the editor shows that the agent took it. With a reply, ask the person a question about an unclear note.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "id": { "type": "integer" },
+                    "reply": { "type": "string" }
+                },
+                "required": ["id"]
             }),
         ),
         tool(
@@ -235,17 +247,17 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
             },
             true,
         )),
-        "note_done" => {
+        "note_done" | "note_take" => {
             let Some(id) = args["id"].as_u64().and_then(|n| u32::try_from(n).ok()) else {
-                return ("note_done needs an integer `id`.".into(), true);
+                return (format!("{name} needs an integer `id`."), true);
             };
-            text_of(notes::run(
-                notes::Action::Done {
-                    id,
-                    reply: arg_string(args, "reply"),
-                },
-                true,
-            ))
+            let reply = arg_string(args, "reply");
+            let action = if name == "note_done" {
+                notes::Action::Done { id, reply }
+            } else {
+                notes::Action::Take { id, reply }
+            };
+            text_of(notes::run(action, true))
         }
         "list_components" => (COMPONENTS.into(), false),
         "docs_search" => {
