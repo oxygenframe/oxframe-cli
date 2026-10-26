@@ -6,6 +6,15 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.23.10 — 2026-10-26
+
+- Creates projects on oxframe 0.23.10, which fixes crackling speech in a
+  render with several jobs (the TTS cache was written by every job at once).
+- Editor 0.1.7: reloading the page while the video played no longer leaves
+  it running behind a ▶ with no sound; a reload starts from the beginning,
+  and so does a rebuild, at most every 15 s; a play/pause button in the
+  middle of the frame.
+
 ## 0.23.9 — 2026-10-26
 
 - Creates projects on oxframe 0.23.9.
