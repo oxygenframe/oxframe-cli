@@ -8,13 +8,16 @@ same version (see the SDK's
 
 ## 0.24.0 — 2026-10-26
 
-- Notes for the agent. In `oxframe dev` (editor 0.2.0), Comment or C marks
+- Notes for the agent. In `oxframe dev` (editor 0.2.1), Comment or C marks
   a node or an area of the frame and takes a note; notes are kept in
   `out/notes/`. `oxframe check` lists open notes first as `review_note`
   errors (text, time, node, `file:line`, a crop of the frame) and exits
   non-zero while any is open. `oxframe notes` lists them and `oxframe notes
   done <id> --reply "…"` closes one; the reply shows up in the editor. MCP
   tools: `notes`, `note_done`.
+- Editor 0.2.1: ←/→ jump 5 s (Shift: 1 s) and keep the video playing;
+  `,`/`.` step a frame (`<`/`>` ten); dragging the playhead during playback
+  plays on from where it is let go.
 - Creates projects on oxframe 0.24.0.
 
 ## 0.23.10 — 2026-10-26
