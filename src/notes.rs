@@ -49,6 +49,10 @@ pub struct Note {
     pub crop: Option<String>,
     #[serde(default)]
     pub status: Status,
+    /// The agent is working on it (`oxframe notes take`); a change of status
+    /// clears it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub taken: bool,
     /// What the agent says it changed.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reply: Option<String>,
@@ -166,6 +170,7 @@ pub fn apply(root: &Path, edit: Edit) -> std::io::Result<()> {
                 bounds,
                 crop,
                 status: Status::Open,
+                taken: false,
                 reply: None,
                 created: now(),
             });
@@ -174,6 +179,7 @@ pub fn apply(root: &Path, edit: Edit) -> std::io::Result<()> {
             if let Some(n) = notes.notes.iter_mut().find(|n| n.id == id) {
                 if let Some(s) = status {
                     n.status = s;
+                    n.taken = false;
                 }
                 if let Some(t) = text {
                     n.text = t.trim().to_owned();
@@ -264,28 +270,22 @@ pub fn run(action: Action, json: bool) -> Done {
             if shown.is_empty() {
                 crate::note("no open review notes");
             }
-            for n in shown {
-                let at = if (n.time[1] - n.time[0]).abs() < 1e-6 {
-                    format!("{:.2}s", n.time[0])
-                } else {
-                    format!("{:.2}–{:.2}s", n.time[0], n.time[1])
-                };
-                let what = n.node.as_deref().unwrap_or("area");
-                let src = n
-                    .source
-                    .as_deref()
-                    .map_or(String::new(), |s| format!(" ({s})"));
-                let done = if n.status == Status::Done {
-                    " [done]"
-                } else {
-                    ""
-                };
-                println!("#{} at {at}, {what}{src}{done}: {}", n.id, n.text);
-                if let Some(r) = &n.reply {
-                    println!("    reply: {r}");
-                }
-            }
+            print_notes(&shown);
             Done::plain(exit::OK)
+        }
+        Action::Wait { timeout } => wait(&root, timeout, json),
+        Action::Take { id, reply } => {
+            let Some(i) = find(&mut notes, id) else {
+                return crate::reply::fail(json, exit::ENV, format!("no note #{id}"));
+            };
+            if notes.notes[i].status != Status::Open {
+                return crate::reply::fail(json, exit::ENV, format!("note #{id} is closed"));
+            }
+            notes.notes[i].taken = true;
+            if reply.is_some() {
+                notes.notes[i].reply = reply;
+            }
+            finish(&root, &notes, json, format!("took note #{id}"))
         }
         Action::Done { id, reply } | Action::Reopen { id, reply } => {
             let (status, verb) = if closing {
@@ -297,6 +297,7 @@ pub fn run(action: Action, json: bool) -> Done {
                 return crate::reply::fail(json, exit::ENV, format!("no note #{id}"));
             };
             notes.notes[i].status = status;
+            notes.notes[i].taken = false;
             if reply.is_some() {
                 notes.notes[i].reply = reply;
             }
@@ -312,6 +313,73 @@ pub fn run(action: Action, json: bool) -> Done {
             }
             finish(&root, &notes, json, format!("deleted note #{id}"))
         }
+    }
+}
+
+/// One line per note (and its reply), as `oxframe notes` prints them.
+fn print_notes(shown: &[&Note]) {
+    if !shown.is_empty() {
+        println!(
+            "Review notes from the oxframe dev editor (open ones are review_note errors in check):"
+        );
+    }
+    for n in shown {
+        let at = if (n.time[1] - n.time[0]).abs() < 1e-6 {
+            format!("{:.2}s", n.time[0])
+        } else {
+            format!("{:.2}–{:.2}s", n.time[0], n.time[1])
+        };
+        let what = n.node.as_deref().unwrap_or("area");
+        let src = n
+            .source
+            .as_deref()
+            .map_or(String::new(), |s| format!(" ({s})"));
+        let state = match (n.status, n.taken) {
+            (Status::Done, _) => " [done]",
+            (Status::Open, true) => " [taken]",
+            (Status::Open, false) => "",
+        };
+        println!("#{} at {at}, {what}{src}{state}: {}", n.id, n.text);
+        if let Some(c) = &n.crop {
+            println!("    crop: out/notes/{c}");
+        }
+        if let Some(r) = &n.reply {
+            println!("    reply: {r}");
+        }
+    }
+}
+
+/// `oxframe notes wait`: returns once an open note nobody has taken is
+/// there, so an agent can keep it running in the background and be woken
+/// by the next note.
+fn wait(root: &Path, timeout: Option<u64>, json: bool) -> Done {
+    let start = std::time::Instant::now();
+    loop {
+        let notes = load(root);
+        let new: Vec<&Note> = notes
+            .notes
+            .iter()
+            .filter(|n| n.status == Status::Open && !n.taken)
+            .collect();
+        if !new.is_empty() {
+            if json {
+                return crate::reply::done(json, exit::OK, json!({ "notes": new }));
+            }
+            print_notes(&new);
+            println!(
+                "Take each with `oxframe notes take <id>`, do what it asks, close it with \
+                 `oxframe notes done <id> --reply \"…\"`, then run `oxframe notes wait` again."
+            );
+            return Done::plain(exit::OK);
+        }
+        if timeout.is_some_and(|t| start.elapsed().as_secs() >= t) {
+            if json {
+                return crate::reply::done(json, exit::OK, json!({ "notes": [] }));
+            }
+            crate::note("no new review notes");
+            return Done::plain(exit::OK);
+        }
+        std::thread::sleep(std::time::Duration::from_millis(500));
     }
 }
 
@@ -333,6 +401,20 @@ pub enum Action {
     List {
         #[arg(long)]
         all: bool,
+    },
+    /// Wait until there is an open note nobody has taken, and print it. Run
+    /// it in the background to be woken by the next note.
+    Wait {
+        /// Give up after this many seconds (prints nothing new).
+        #[arg(long, value_name = "SECONDS")]
+        timeout: Option<u64>,
+    },
+    /// Mark a note as taken by the agent; the editor shows it.
+    Take {
+        id: u32,
+        /// A question or a status for the person; the editor shows it.
+        #[arg(long)]
+        reply: Option<String>,
     },
     /// Close a note once the scene is changed.
     Done {
@@ -424,6 +506,36 @@ mod tests {
         assert!(!dir_crop(root, "1.png").exists(), "its crop goes too");
         add(root, "third", None);
         assert_eq!(load(root).notes.last().unwrap().id, 3, "ids are not reused");
+    }
+
+    #[test]
+    fn wait_returns_notes_nobody_took() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let waited = |root: &Path| {
+            wait(root, Some(0), true).body["notes"]
+                .as_array()
+                .unwrap()
+                .len()
+        };
+        assert_eq!(waited(root), 0, "no notes: gives up after the timeout");
+        add(root, "bigger", None);
+        assert_eq!(waited(root), 1);
+
+        let mut notes = load(root);
+        notes.notes[0].taken = true;
+        save(root, &notes).unwrap();
+        assert_eq!(waited(root), 0, "a taken note does not wake the agent");
+        assert!(
+            issues(root, &root.join("out/check")).len() == 1,
+            "but check still reports it"
+        );
+
+        // The person sends it back from the editor: open, not taken.
+        let set = r#"{"type":"NoteSet","id":1,"status":"open"}"#;
+        apply(root, Edit::parse(set).unwrap()).unwrap();
+        assert!(!load(root).notes[0].taken);
+        assert_eq!(waited(root), 1);
     }
 
     fn dir_crop(root: &Path, name: &str) -> PathBuf {

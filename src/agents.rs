@@ -10,6 +10,10 @@ const CLAUDE_MD: &str = include_str!("../templates/agents/CLAUDE.md");
 pub(crate) const SKILL_MD: &str = include_str!("../templates/agents/SKILL.md");
 pub(crate) const REFERENCE_MD: &str = include_str!("../templates/agents/reference.md");
 
+/// The Claude Code hook that shows the open review notes with every prompt
+/// (silent when there are none, and never blocks the prompt).
+const NOTES_HOOK: &str = "oxframe notes 2>/dev/null || true";
+
 /// Version marker inside the generated files.
 const MARKER: &str = "oxframe-agents ";
 
@@ -68,7 +72,42 @@ pub fn write(dir: &Path, force: bool) -> std::io::Result<Report> {
         std::fs::write(&path, content)?;
         report.written.push(rel.to_owned());
     }
+    notes_hook(dir, &mut report)?;
     Ok(report)
+}
+
+/// Adds the notes hook to `.claude/settings.json`, keeping whatever else is
+/// there; a file we cannot read as JSON is left alone.
+fn notes_hook(dir: &Path, report: &mut Report) -> std::io::Result<()> {
+    const REL: &str = ".claude/settings.json";
+    let path = dir.join(REL);
+    let mut settings = match std::fs::read_to_string(&path) {
+        Ok(text) => match serde_json::from_str::<serde_json::Value>(&text) {
+            Ok(v) if v.is_object() => v,
+            _ => {
+                report.skipped.push(REL.to_owned());
+                return Ok(());
+            }
+        },
+        Err(_) => serde_json::json!({}),
+    };
+    let hooks = &mut settings["hooks"]["UserPromptSubmit"];
+    if hooks.to_string().contains("oxframe notes") {
+        return Ok(());
+    }
+    if !hooks.is_array() {
+        *hooks = serde_json::json!([]);
+    }
+    hooks
+        .as_array_mut()
+        .expect("an array")
+        .push(serde_json::json!({ "hooks": [{ "type": "command", "command": NOTES_HOOK }] }));
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&path, serde_json::to_string_pretty(&settings)? + "\n")?;
+    report.written.push(REL.to_owned());
+    Ok(())
 }
 
 /// `oxframe agents [--force]`.
@@ -86,7 +125,13 @@ pub fn run(force: bool) -> u8 {
                 crate::note(format!("wrote {f}"));
             }
             for f in &r.skipped {
-                crate::note(format!("kept {f} (edited by you; use --force to replace)"));
+                if f.ends_with("settings.json") {
+                    crate::note(format!(
+                        "kept {f} (not plain JSON); add a UserPromptSubmit hook `{NOTES_HOOK}` by hand"
+                    ));
+                } else {
+                    crate::note(format!("kept {f} (edited by you; use --force to replace)"));
+                }
             }
             if r.written.is_empty() && r.skipped.is_empty() {
                 crate::note("agent instructions are up to date");
@@ -108,7 +153,7 @@ mod tests {
     fn writes_updates_and_respects_user_files() {
         let tmp = tempfile::tempdir().unwrap();
         let r = write(tmp.path(), false).unwrap();
-        assert_eq!(r.written.len(), 4);
+        assert_eq!(r.written.len(), 5);
         let skill =
             std::fs::read_to_string(tmp.path().join(".claude/skills/oxframe/SKILL.md")).unwrap();
         assert!(skill.starts_with("---\nname: oxframe\ndescription: "));
@@ -126,6 +171,36 @@ mod tests {
         assert_eq!(r.written, vec!["AGENTS.md"]);
         assert_eq!(r.skipped, vec!["CLAUDE.md"]);
         assert_eq!(write(tmp.path(), true).unwrap().written, vec!["CLAUDE.md"]);
+    }
+
+    #[test]
+    fn adds_the_notes_hook_to_claude_settings() {
+        let tmp = tempfile::tempdir().unwrap();
+        let path = tmp.path().join(".claude/settings.json");
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(
+            &path,
+            r#"{"permissions":{"allow":["Bash(cargo:*)"]},"hooks":{"UserPromptSubmit":[{"hooks":[{"type":"command","command":"date"}]}]}}"#,
+        )
+        .unwrap();
+        write(tmp.path(), false).unwrap();
+        let v: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+        assert_eq!(
+            v["permissions"]["allow"][0], "Bash(cargo:*)",
+            "the user's settings stay"
+        );
+        let hooks = v["hooks"]["UserPromptSubmit"].as_array().unwrap();
+        assert_eq!(hooks.len(), 2);
+        assert_eq!(hooks[1]["hooks"][0]["command"], NOTES_HOOK);
+        // Once only.
+        assert_eq!(write(tmp.path(), false).unwrap(), Report::default());
+        // Not JSON: left alone.
+        std::fs::write(&path, "{ // mine").unwrap();
+        assert_eq!(
+            write(tmp.path(), false).unwrap().skipped,
+            vec![".claude/settings.json"]
+        );
     }
 
     #[test]
