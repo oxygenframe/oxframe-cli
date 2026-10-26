@@ -9,7 +9,7 @@ use std::io::{BufRead, Write};
 use serde_json::{Value, json};
 
 use crate::reply::Done;
-use crate::{agents, check, exit, render, snapshot};
+use crate::{agents, check, exit, notes, render, snapshot};
 
 const PROTOCOL: &str = "2024-11-05";
 
@@ -69,6 +69,28 @@ fn tools() -> Vec<Value> {
                     "against": { "type": "string", "description": "An earlier check output made with frames (e.g. out/before): list the frames that changed and write diff images." },
                     "out": { "type": "string", "description": "Write the storyboard and report here instead of out/check (e.g. out/before, with frames, to compare against later)." }
                 }
+            }),
+        ),
+        tool(
+            "notes",
+            "Review notes a person left in the `oxframe dev` editor: text, time, node, file:line, marked area and a crop. `check` also reports the open ones first, as review_note errors. Fix what each says, then close it with note_done.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "all": { "type": "boolean", "description": "Also closed notes." }
+                }
+            }),
+        ),
+        tool(
+            "note_done",
+            "Close a review note after changing the scene; the reply is shown under the note in the editor.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "id": { "type": "integer" },
+                    "reply": { "type": "string", "description": "What you changed, one sentence." }
+                },
+                "required": ["id"]
             }),
         ),
         tool(
@@ -206,6 +228,24 @@ fn call_tool(name: &str, args: &Value) -> (String, bool) {
                 serde_json::to_string_pretty(&passes_only(done.body)).unwrap_or_default(),
                 failed,
             )
+        }
+        "notes" => text_of(notes::run(
+            notes::Action::List {
+                all: args["all"].as_bool().unwrap_or(false),
+            },
+            true,
+        )),
+        "note_done" => {
+            let Some(id) = args["id"].as_u64().and_then(|n| u32::try_from(n).ok()) else {
+                return ("note_done needs an integer `id`.".into(), true);
+            };
+            text_of(notes::run(
+                notes::Action::Done {
+                    id,
+                    reply: arg_string(args, "reply"),
+                },
+                true,
+            ))
         }
         "list_components" => (COMPONENTS.into(), false),
         "docs_search" => {

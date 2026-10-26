@@ -108,7 +108,11 @@ pub fn run(args: DevArgs) -> crate::reply::Done {
             ui,
             token: token.clone(),
             port,
+            root: root.clone(),
         };
+        // `oxframe notes done` (an agent) changes the notes behind the
+        // editor's back: show that.
+        tokio::spawn(watch_notes(root.clone(), hub.clone()));
         let sup = supervisor::Supervisor {
             root,
             release,
@@ -145,6 +149,20 @@ pub fn run(args: DevArgs) -> crate::reply::Done {
         crate::reply::Done::with(code, serde_json::json!({ "error": error }))
     } else {
         crate::reply::Done::plain(code)
+    }
+}
+
+async fn watch_notes(root: PathBuf, hub: Arc<hub::Hub>) {
+    let file = crate::notes::dir(&root).join("notes.json");
+    let stamp = |f: &Path| std::fs::metadata(f).and_then(|m| m.modified()).ok();
+    let mut last = stamp(&file);
+    loop {
+        tokio::time::sleep(std::time::Duration::from_millis(700)).await;
+        let now = stamp(&file);
+        if now != last {
+            last = now;
+            hub.to_ui(hub::Msg::Text(crate::notes::message(&root)));
+        }
     }
 }
 

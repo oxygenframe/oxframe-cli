@@ -25,6 +25,7 @@ version — the API changes between versions:
 | Goal | Command |
 |---|---|
 | **Check a change** (compile, then look) | `oxframe check` → `out/check/storyboard.png` and `out/check/report.json`. Exit 1 if any issue is an error. |
+| **Notes from a person** | `oxframe notes`; close one with `oxframe notes done <id> --reply "…"`. Open notes are `review_note` errors in `check`. |
 | Scene tree at one time | `oxframe inspect --at 2.5` (JSON: kind, name, bounds, text, `file:line`; `transition` with kind and progress while one is playing). `--graph` adds `passes`: vector, then composite |
 | One still (960×540) | `oxframe snapshot --at 1.5` → prints the PNG path |
 | Scene length, markers | `cargo run -q -- info` (JSON) |
@@ -166,6 +167,7 @@ Make an event (a splash, a swell) a signal change at that moment, such as `lens.
 - Colors: `color!("#rrggbb")` (compile-time checked) or `Color::rgb(r, g, b)` with 0..1 floats.
 - Keep each scene a straight story: prefer `all(..)`/`stagger(..)` and the helpers `fade_in()`, `fade_out()`, `pop_in()`, `slide_in(Side::Left)`, `draw_on()` (timed by the theme; `.duration(s)` to change) over manual tweens and frame loops; `next_frame()` only for per-frame logic.
 - After each visual change run `oxframe check`, open `out/check/storyboard.png` and read `report.json`, fix what it reports, and run it again. Do not report success while it exits non-zero.
+- A `review_note` issue is a person's note from the `oxframe dev` editor (Comment, then click or drag in the frame): do what `note_text` asks at that time and place, then `oxframe notes done <id> --reply "what you changed"`. `oxframe notes` lists the open ones.
 - Name nodes that matter in the story: `.name("title")`. Without a name, check and inspect label the node by the `add` call site (`src/main.rs:42`).
 
 ## Common compile errors

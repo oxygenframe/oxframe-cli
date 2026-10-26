@@ -754,6 +754,7 @@ dependencies = [
  "anstyle",
  "anyhow",
  "axum",
+ "base64",
  "clap",
  "flate2",
  "futures-util",

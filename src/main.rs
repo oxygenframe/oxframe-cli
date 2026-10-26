@@ -15,6 +15,7 @@ mod ffmpeg;
 mod hints;
 mod init;
 mod mcp;
+mod notes;
 mod publish;
 mod render;
 mod reply;
@@ -182,6 +183,11 @@ enum Cmd {
         /// (e.g. out/before, to compare against later).
         #[arg(long, value_name = "DIR")]
         out: Option<PathBuf>,
+    },
+    /// Review notes left in the `oxframe dev` editor (`check` reports the open ones).
+    Notes {
+        #[command(subcommand)]
+        action: Option<notes::Action>,
     },
     /// Print the scene tree at a time as JSON (kind, name, bounds, text).
     Inspect {
@@ -372,6 +378,10 @@ fn main() -> ExitCode {
             against,
             out,
         } => check::run(frames, against, out, cli.json),
+        Cmd::Notes { action } => notes::run(
+            action.unwrap_or(notes::Action::List { all: false }),
+            cli.json,
+        ),
         Cmd::Inspect { at, scene, graph } => check::inspect(at, scene, graph, cli.json),
         Cmd::Snapshot {
             at,
