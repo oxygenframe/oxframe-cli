@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use crate::reply::Done;
 use crate::{cargo, config, exit, render, ui};
 
-pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
+pub fn run(frames: bool, against: Option<PathBuf>, out: Option<PathBuf>, json: bool) -> Done {
     let root = match config::project_root() {
         Ok(r) => r,
         Err(e) => return crate::reply::fail(json, exit::ENV, e),
@@ -200,11 +200,16 @@ pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
     if frames {
         cmd.arg("--frames");
     }
-    // The project binary runs in the project root; the path is the user's.
-    if let Some(dir) = against {
-        let dir = std::env::current_dir().map_or(dir.clone(), |cwd| cwd.join(&dir));
-        cmd.arg("--against").arg(dir);
+    // The project binary runs in the project root; the paths are the user's.
+    let user_path =
+        |dir: &PathBuf| std::env::current_dir().map_or(dir.clone(), |cwd| cwd.join(dir));
+    if let Some(dir) = &against {
+        cmd.arg("--against").arg(user_path(dir));
     }
+    let out = out
+        .as_ref()
+        .map_or_else(|| root.join("out/check"), user_path);
+    cmd.arg("--out").arg(&out);
     cmd.args(cfg.theme.args());
     let (status, stdout, stderr) = match crate::reply::capture(&mut cmd, json) {
         Ok(o) => o,
@@ -220,8 +225,8 @@ pub fn run(frames: bool, against: Option<PathBuf>, json: bool) -> Done {
     if !json {
         crate::hints::show(&hints);
     }
-    let report = read_json(&root.join("out/check/report.json"));
-    let storyboard = root.join("out/check/storyboard.png");
+    let report = read_json(&out.join("report.json"));
+    let storyboard = out.join("storyboard.png");
     crate::reply::done(
         json,
         status,

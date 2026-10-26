@@ -25,7 +25,7 @@ pub struct Supervisor {
     pub root: PathBuf,
     pub release: bool,
     pub bin: Option<String>,
-    pub cpu: bool,
+    pub gpu: bool,
     /// Keep the project binary's stdout off the terminal, so `--json` stays one object.
     pub json: bool,
     pub hub: Arc<Hub>,
@@ -152,8 +152,10 @@ impl Supervisor {
         if let Some(path) = crate::ffmpeg::child_path() {
             cmd.env("PATH", path);
         }
-        if self.cpu {
-            cmd.arg("--cpu");
+        // Nothing for the CPU, the default: before oxframe 0.23.9 the preview
+        // read `--cpu` as "use the GPU".
+        if self.gpu {
+            cmd.arg("--gpu");
         }
         if let Ok(cfg) = crate::config::Config::load(&self.root) {
             cmd.args(cfg.theme.args());
