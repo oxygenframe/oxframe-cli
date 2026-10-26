@@ -27,7 +27,8 @@ pub struct DevArgs {
     pub no_open: bool,
     pub release: bool,
     pub ui_dir: Option<PathBuf>,
-    pub cpu: bool,
+    /// Draw on the GPU (`--gpu`, oxframe 0.23.9 and later); the CPU is the default.
+    pub gpu: bool,
     /// `oxframe present`: open the presentation instead of the editor.
     pub present: bool,
     pub json: bool,
@@ -112,7 +113,7 @@ pub fn run(args: DevArgs) -> crate::reply::Done {
             root,
             release,
             bin: cfg.bin,
-            cpu: args.cpu,
+            gpu: args.gpu,
             json,
             hub,
         };

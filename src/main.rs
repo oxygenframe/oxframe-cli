@@ -78,7 +78,10 @@ enum Cmd {
         /// Serve the editor from a directory instead of the embedded one.
         #[arg(long)]
         ui_dir: Option<PathBuf>,
-        /// Render on the CPU.
+        /// Draw on the GPU (vello). The CPU is the default.
+        #[arg(long)]
+        gpu: bool,
+        /// Draw on the CPU (the default; wins over --gpu).
         #[arg(long)]
         cpu: bool,
     },
@@ -98,7 +101,10 @@ enum Cmd {
         /// Serve the editor from a directory instead of the embedded one.
         #[arg(long)]
         ui_dir: Option<PathBuf>,
-        /// Render previews on the CPU.
+        /// Draw previews on the GPU (vello). The CPU is the default.
+        #[arg(long)]
+        gpu: bool,
+        /// Draw previews on the CPU (the default; wins over --gpu).
         #[arg(long)]
         cpu: bool,
     },
@@ -169,9 +175,13 @@ enum Cmd {
         #[arg(long)]
         frames: bool,
         /// Compare the frames with an earlier `oxframe check --frames --out <dir>`:
-        /// lists the frames that changed and writes out/check/diff/.
+        /// lists the frames that changed and writes <out>/diff/.
         #[arg(long, value_name = "DIR")]
         against: Option<PathBuf>,
+        /// Write the storyboard and the report here instead of out/check/
+        /// (e.g. out/before, to compare against later).
+        #[arg(long, value_name = "DIR")]
+        out: Option<PathBuf>,
     },
     /// Print the scene tree at a time as JSON (kind, name, bounds, text).
     Inspect {
@@ -282,6 +292,7 @@ fn main() -> ExitCode {
             no_open,
             release,
             ui_dir,
+            gpu,
             cpu,
         } => dev::run(dev::DevArgs {
             port,
@@ -289,7 +300,7 @@ fn main() -> ExitCode {
             no_open,
             release,
             ui_dir,
-            cpu,
+            gpu: gpu && !cpu,
             present: false,
             json: cli.json,
         }),
@@ -298,6 +309,7 @@ fn main() -> ExitCode {
             no_open,
             release,
             ui_dir,
+            gpu,
             cpu,
         } => dev::run(dev::DevArgs {
             port,
@@ -305,7 +317,7 @@ fn main() -> ExitCode {
             no_open,
             release,
             ui_dir,
-            cpu,
+            gpu: gpu && !cpu,
             present: true,
             json: cli.json,
         }),
@@ -355,7 +367,11 @@ fn main() -> ExitCode {
             gpu,
             json: cli.json,
         }),
-        Cmd::Check { frames, against } => check::run(frames, against, cli.json),
+        Cmd::Check {
+            frames,
+            against,
+            out,
+        } => check::run(frames, against, out, cli.json),
         Cmd::Inspect { at, scene, graph } => check::inspect(at, scene, graph, cli.json),
         Cmd::Snapshot {
             at,

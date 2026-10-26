@@ -6,6 +6,19 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.23.9 — 2026-10-26
+
+- Creates projects on oxframe 0.23.9.
+- `oxframe check --out out/before` writes the storyboard and the report to
+  another folder, for a later `--against out/before`; the MCP `check` tool
+  takes `out` too. The docs and the skills gave this command, but the CLI
+  rejected `--out`.
+- `oxframe dev --gpu` and `oxframe present --gpu` draw the preview with
+  vello (projects on oxframe 0.23.9 and later). `--cpu` no longer reaches
+  the project binary: before 0.23.9 the preview read it as "use the GPU".
+- The update hint names the way the CLI was installed: the install script,
+  Homebrew or cargo.
+
 ## 0.23.8 — 2026-10-25
 
 - Creates projects on oxframe 0.23.8.

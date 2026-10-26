@@ -13,6 +13,21 @@ use std::time::{Duration, SystemTime};
 const CRATE: &str = "oxframe-cli";
 const INTERVAL: Duration = Duration::from_secs(24 * 60 * 60);
 
+/// How to update, from where this binary lives.
+fn upgrade_command(exe: &str) -> String {
+    let exe = exe.replace('\\', "/");
+    if exe.contains("/.cargo/bin/") {
+        format!("cargo install {CRATE} --force")
+    } else if exe.contains("/Cellar/") || exe.contains("/homebrew/") || exe.contains("/linuxbrew/")
+    {
+        "brew upgrade oxframe".to_owned()
+    } else if cfg!(windows) {
+        "run the installer again (irm https://github.com/oxygenframe/oxframe-cli/releases/latest/download/install.ps1 | iex)".to_owned()
+    } else {
+        "run the installer again (curl -fsSL https://github.com/oxygenframe/oxframe-cli/releases/latest/download/install.sh | sh)".to_owned()
+    }
+}
+
 /// Prints the hint if the cache knows a newer version, and refreshes the
 /// cache in the background when it is older than a day.
 pub fn run() {
@@ -24,9 +39,11 @@ pub fn run() {
     if let Some(latest) = parse_search(&text)
         && is_newer(&latest, env!("CARGO_PKG_VERSION"))
     {
+        let exe = std::env::current_exe().unwrap_or_default();
         crate::note(format!(
-            "oxframe-cli {latest} is available (you have {}): cargo install {CRATE} --force",
-            env!("CARGO_PKG_VERSION")
+            "oxframe-cli {latest} is available (you have {}): {}",
+            env!("CARGO_PKG_VERSION"),
+            upgrade_command(&exe.to_string_lossy())
         ));
     }
     let stale = std::fs::metadata(&file)
@@ -99,6 +116,25 @@ mod tests {
         assert_eq!(parse_search(out).as_deref(), Some("0.3.1"));
         assert_eq!(parse_search(""), None);
         assert_eq!(parse_search("oxframe = \"9.0.0\"  # other crate"), None);
+    }
+
+    #[test]
+    fn suggests_the_way_it_was_installed() {
+        assert!(upgrade_command("/home/a/.cargo/bin/oxframe").starts_with("cargo install"));
+        assert_eq!(
+            upgrade_command("/opt/homebrew/bin/oxframe"),
+            "brew upgrade oxframe"
+        );
+        assert_eq!(
+            upgrade_command("/usr/local/Cellar/oxframe/0.23.8/bin/oxframe"),
+            "brew upgrade oxframe"
+        );
+        assert!(
+            upgrade_command("/home/a/.local/bin/oxframe").starts_with("run the installer again")
+        );
+        assert!(
+            upgrade_command("C:\\Users\\a\\.cargo\\bin\\oxframe.exe").starts_with("cargo install")
+        );
     }
 
     #[test]
