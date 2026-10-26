@@ -57,6 +57,11 @@ async fn wait_for(ws: &mut Ws, timeout: Duration, mut pred: impl FnMut(&Event) -
             .await
             .expect("timed out waiting for event");
         if let Some(Ok(Message::Text(t))) = msg {
+            // The dev hub's own messages (review notes) are not engine events.
+            let v: serde_json::Value = serde_json::from_str(&t).unwrap();
+            if v["type"] == "Notes" {
+                continue;
+            }
             let e: Event = serde_json::from_str(&t).unwrap();
             // A build error will not turn into the awaited event: fail now
             // with the compiler's message instead of at the timeout.

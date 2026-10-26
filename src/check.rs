@@ -225,7 +225,48 @@ pub fn run(frames: bool, against: Option<PathBuf>, out: Option<PathBuf>, json: b
     if !json {
         crate::hints::show(&hints);
     }
-    let report = read_json(&out.join("report.json"));
+    let mut report = read_json(&out.join("report.json"));
+    // A person's review notes come first: they say what is wrong in words.
+    let review = crate::notes::issues(&root, &out);
+    let mut status = status;
+    if !review.is_empty() {
+        if report.is_null() {
+            report = json!({ "issues": [] });
+        }
+        if let Some(issues) = report.get_mut("issues").and_then(Value::as_array_mut) {
+            issues.splice(0..0, review.iter().cloned());
+            let _ = std::fs::write(
+                out.join("report.json"),
+                serde_json::to_string_pretty(&report).unwrap_or_default(),
+            );
+        }
+        if !json {
+            anstream::eprintln!(
+                "
+review notes from the editor ({}):",
+                review.len()
+            );
+            for n in &review {
+                let src = n["source"]
+                    .as_str()
+                    .map_or(String::new(), |s| format!(" {s}"));
+                anstream::eprintln!(
+                    "  error[{}] #{} at {:.2}s {}{src}: {}",
+                    crate::notes::RULE,
+                    n["note"],
+                    n["time"][0].as_f64().unwrap_or(0.0),
+                    n["node"].as_str().unwrap_or(""),
+                    n["note_text"].as_str().unwrap_or(""),
+                );
+            }
+            anstream::eprintln!(
+                "  close each with `oxframe notes done <id> --reply \"what you changed\"`"
+            );
+        }
+        if status == exit::OK {
+            status = exit::BUILD;
+        }
+    }
     let storyboard = out.join("storyboard.png");
     crate::reply::done(
         json,

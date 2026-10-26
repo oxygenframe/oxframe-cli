@@ -748,12 +748,13 @@ dependencies = [
 
 [[package]]
 name = "oxframe-cli"
-version = "0.23.10"
+version = "0.24.0"
 dependencies = [
  "anstream",
  "anstyle",
  "anyhow",
  "axum",
+ "base64",
  "clap",
  "flate2",
  "futures-util",
@@ -777,7 +778,7 @@ dependencies = [
 
 [[package]]
 name = "oxframe-protocol"
-version = "0.23.10"
+version = "0.24.0"
 dependencies = [
  "serde",
  "serde_json",

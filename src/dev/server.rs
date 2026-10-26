@@ -1,5 +1,6 @@
 //! HTTP server for the editor: static UI and the editor WebSocket.
 
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use axum::Router;
@@ -21,11 +22,14 @@ pub struct State {
     pub ui: UiSource,
     pub token: String,
     pub port: u16,
+    /// Project root, for the review notes in `out/notes/`.
+    pub root: PathBuf,
 }
 
 pub async fn serve(listener: tokio::net::TcpListener, state: State) -> std::io::Result<()> {
     let app = Router::new()
         .route("/ws", get(ws))
+        .route("/notes/{file}", get(note_crop))
         .fallback(get(asset))
         .with_state(state);
     axum::serve(listener, app).await
@@ -69,12 +73,31 @@ async fn ws(
                 .await;
         });
     }
-    upgrade.on_upgrade(move |socket| editor(socket, state.hub))
+    upgrade.on_upgrade(move |socket| editor(socket, state.hub, state.root))
 }
 
-async fn editor(socket: WebSocket, hub: Arc<Hub>) {
+/// A review note's crop, `out/notes/<id>.png`; same token as the socket.
+async fn note_crop(
+    axum::extract::Path(file): axum::extract::Path<String>,
+    Query(q): Query<WsQuery>,
+    AxState(state): AxState<State>,
+) -> Response {
+    let name_ok = file
+        .strip_suffix(".png")
+        .is_some_and(|id| !id.is_empty() && id.bytes().all(|b| b.is_ascii_digit()));
+    if q.token.as_deref() != Some(state.token.as_str()) || !name_ok {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    match std::fs::read(crate::notes::dir(&state.root).join(&file)) {
+        Ok(png) => ([(header::CONTENT_TYPE, "image/png")], png).into_response(),
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+async fn editor(socket: WebSocket, hub: Arc<Hub>, root: PathBuf) {
     let (mut sink, mut stream) = socket.split();
     let (tx, mut rx) = unbounded_channel::<Msg>();
+    let _ = tx.send(Msg::Text(crate::notes::message(&root)));
     let id = hub.add_ui(tx);
     let writer = tokio::spawn(async move {
         while let Some(m) = rx.recv().await {
@@ -89,7 +112,16 @@ async fn editor(socket: WebSocket, hub: Arc<Hub>) {
     });
     while let Some(Ok(msg)) = stream.next().await {
         match msg {
-            Message::Text(t) => hub.forward_from_ui(Msg::Text(t.to_string())),
+            // Review notes are the CLI's, not the engine's.
+            Message::Text(t) => match crate::notes::Edit::parse(&t) {
+                Some(edit) => {
+                    if let Err(e) = crate::notes::apply(&root, edit) {
+                        tracing::warn!("cannot write the review notes: {e}");
+                    }
+                    hub.to_ui(Msg::Text(crate::notes::message(&root)));
+                }
+                None => hub.forward_from_ui(Msg::Text(t.to_string())),
+            },
             Message::Binary(b) => hub.forward_from_ui(Msg::Binary(b.to_vec())),
             Message::Close(_) => break,
             _ => {}

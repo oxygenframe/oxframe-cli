@@ -9,13 +9,14 @@ The project is on oxframe {{SDK_VERSION}}: docs https://oxframe.dev/docs/{{DOCS_
 model text https://oxframe.dev/docs/{{DOCS_SERIES}}/llms.txt
 (and https://oxframe.dev/docs/{{DOCS_SERIES}}/llms-full.txt),
 API https://docs.rs/oxframe/{{SDK_VERSION}}/oxframe/.
-`oxframe mcp` exposes check, storyboard, inspect, render_frame, render_graph, list_components, docs_search and render. `oxframe --json check` prints one JSON object.
+`oxframe mcp` exposes check, notes, note_done, storyboard, inspect, render_frame, render_graph, list_components, docs_search and render. `oxframe --json check` prints one JSON object.
 
 ## Workflow
 
 1. Read `src/main.rs` and the scene's `src/<scene>.meta.json` (markers/tunables already tuned by a human — keep them).
 2. Make the change. Prefer small, readable steps: one `.await` per beat of the story, `all((..))` for things that happen together.
 3. `oxframe check`. Fix compile errors first (see AGENTS.md, "Common compile errors"). Then open `out/check/storyboard.png` and `out/check/report.json`. Each issue names a rule, a time range, a node and `file:line`. An issue on a node also has `crop`, a close-up PNG under `out/check/issues/` with the node outlined: open it. Most issues carry `fix`, the change with the numbers worked out (`move` by `dx`/`dy` px, `shrink`, a text `color`, `widen` by px or `font_scale`, `hold` or `slow` in seconds): start from it, and keep the design in mind (moving a title 140 px may call for moving its neighbours too).
+   Issues with rule `review_note` come first: a person marked something in the `oxframe dev` editor and wrote what to change (`note_text`, with the time, the node, `file:line` and a `crop`). Do what the note asks, even when nothing else is wrong there, then close it: `oxframe notes done <id> --reply "what you changed"` (MCP: `note_done`). The reply shows under the note in the editor. If a note is unclear or asks for something you cannot do, say so in the reply and leave it open.
 4. Fix and run `oxframe check` again until it exits 0. Warnings do not fail the command; errors do.
 5. `oxframe inspect --at <t>` when a frame looks wrong and you need the node tree (kind, name, bounds, text). Add `--graph` to see render passes. `oxframe snapshot --at <t>` for one still (960×540; `--size` for another).
 6. Only then report. Mention the storyboard and which issues you fixed.
