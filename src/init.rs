@@ -36,7 +36,7 @@ pub enum Template {
 }
 
 /// SDK version this CLI is made for (pinned in generated projects).
-pub const SDK_VERSION: &str = "0.23.10";
+pub const SDK_VERSION: &str = "0.24.0";
 
 fn valid_name(name: &str) -> bool {
     !name.is_empty()
