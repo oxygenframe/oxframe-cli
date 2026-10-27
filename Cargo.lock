@@ -748,7 +748,7 @@ dependencies = [
 
 [[package]]
 name = "oxframe-cli"
-version = "0.24.1"
+version = "0.24.2"
 dependencies = [
  "anstream",
  "anstyle",
@@ -778,7 +778,7 @@ dependencies = [
 
 [[package]]
 name = "oxframe-protocol"
-version = "0.24.0"
+version = "0.24.2"
 dependencies = [
  "serde",
  "serde_json",
