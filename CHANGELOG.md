@@ -6,6 +6,11 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.24.2 — 2026-10-27
+
+- New projects use oxframe 0.24.2, which adds `MadeBy`, `Logo` and
+  `TitleCard::logo()` for a credit with the oxframe logo.
+
 ## 0.24.1 — 2026-10-26
 
 - Notes reach the agent without a message in the chat. `oxframe notes
