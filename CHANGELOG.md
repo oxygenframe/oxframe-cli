@@ -6,6 +6,12 @@ same version (see the SDK's
 
 ## Unreleased
 
+## 0.24.3 — 2026-10-27
+
+- New projects use oxframe 0.24.3: `code.focus_text("main", 0.4)` lights
+  one piece of a line, and `shaders::ripple()` rings show on water and flat
+  fills. The agent guide teaches both.
+
 ## 0.24.2 — 2026-10-27
 
 - New projects use oxframe 0.24.2, which adds `MadeBy`, `Logo` and
