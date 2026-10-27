@@ -1,8 +1,9 @@
 category = "shader"
-prompt = """A short ocean piece in two scenes. Scene one: the sea fills the bottom half, the title "Into the wave" fades in at the top while the camera slowly pushes in. At a marker called "swell" the waves grow; at a marker called "splash" spray flies toward the camera and the lens gets wet, then the camera dives into the water. Scene two: the water washes in as the transition, calm low waves along the bottom, and an end card "Made with oxframe". Keep it deterministic so seeking shows the same frame."""
+prompt = """A short ocean piece in two scenes. Scene one: the sea fills the bottom half, the title "Into the wave" fades in at the top while the camera slowly pushes in. At a marker called "swell" the waves grow; at a marker called "splash" spray flies toward the camera and the lens gets wet, then the camera dives into the water. Scene two: the water washes in as the transition, calm low waves along the bottom, and an end card "Made by Oxframe". Keep it deterministic so seeking shows the same frame."""
 requires = "shaders"
 
 [expect]
-# Spray: the cheat sheet offers Particles or Custom with ctx.rng(seed).
-uses = ["Camera", "waves", "Particles|Custom", "lens_drops", "water_wipe", "wait_until"]
+# Spray: Particles, Custom with ctx.rng(seed), or shapes placed with the
+# scene's seeded random_range; all are deterministic.
+uses = ["Camera", "waves", "Particles|Custom|random_range", "lens_drops", "water_wipe", "wait_until"]
 min_seconds = 4

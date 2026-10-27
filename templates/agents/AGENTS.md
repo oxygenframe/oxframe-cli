@@ -154,11 +154,11 @@ Pick a preset before writing WGSL:
 | A sea or a moving water background | `shaders::waves()`, a box node |
 | Spray, sparks, rain | `Particles::new().seed(7)` with `.burst()`, or `Custom` with `ctx.rng(seed)` |
 | A wet camera lens | `shaders::lens_drops()`, added last, `.fullscreen()` |
-| Rings on water, text or an image | `node.effect(shaders::ripple())` |
+| Rings on water, a fill, text or an image | `node.effect(shaders::ripple())` |
 | A scene change through water | `Transition::shader(shaders::water_wipe())` |
 | Anything else | `Shader::source` with your own `shade`, or `Custom` |
 
-Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and keeps the outline, so a flat fill shows nothing. Inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect they read what that group drew before them, and the group then fades or blurs as a whole. In `water_wipe`, add the next scene's background before the `transition` call.
+Make an event (a splash, a swell) a signal change at that moment, such as `lens.wetness().to(1.0, 0.4)`, not a formula of `ox.time`: the timeline and `check` see signals. `lens_drops` bends what was drawn before it. `node.effect(..)` changes a node's own pixels; `ripple` moves colors and lights one side of each ring, so it shows on water and flat fills too; the outline stays. Inside a group with opacity below 1, a blur, a clip, a blend, a shadow or another effect they read what that group drew before them, and the group then fades or blurs as a whole. In `water_wipe`, add the next scene's background before the `transition` call.
 
 ## Rules
 
