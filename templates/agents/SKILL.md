@@ -37,8 +37,8 @@ Reach for the right node before writing the scene:
 - **Explaining code** (what an expression does, why a line matters, a bug fix):
   a `Code` node is the tool, not plain `Txt`. Show the source, then walk
   attention through it with `.focus(first, last)` or `.focus_lines(a, b, secs)`
-  and `.dim(0.3)` on the rest; to explain parts of one expression, focus each
-  column range in turn. Morph to the next version with `.code().to(next, secs)`,
+  and `.dim(0.3)` on the rest; to explain parts of one expression, light each
+  piece in turn with `.focus_text("(hi - lo)", secs)`, not one `Txt` per token. Morph to the next version with `.code().to(next, secs)`,
   or use `.insert`/`.remove`/`.replace`. For a line-by-line walkthrough with a
   note per step, `CodeExplainer::new(src).step(line, line, "note")`.
 - **Vertical (9:16) or square short:** `Project::new(..).size(1080, 1920)` for
